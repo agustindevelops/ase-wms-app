@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "ase-wms-app",
+    "slug": "ase-wms-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "App needs Bluetooth to connect to NIIMBOT printers",
+        "NSBluetoothPeripheralUsageDescription": "App needs Bluetooth to connect to NIIMBOT printers",
+        "NSLocationWhenInUseUsageDescription": "Required for Bluetooth device scanning",
+        "NSCameraUsageDescription": "App needs the camera to scan barcodes and QR codes"
+      }
+    },
+    "android": {
+      "package": "com.ase.wmsapp",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-dev-client",
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": [
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "App needs Bluetooth to connect to NIIMBOT printers"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "App needs the camera to scan barcodes and QR codes",
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-status-bar"
+    ]
+  }
+}

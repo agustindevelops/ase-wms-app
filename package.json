@@ -1,0 +1,29 @@
+{
+  "name": "ase-wms-app",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "^57.0.11",
+    "expo-camera": "~57.0.3",
+    "expo-dev-client": "^57.0.10",
+    "expo-status-bar": "^57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-ble-plx": "3.5.1",
+    "react-native-niimblue-lib": "patch:react-native-niimblue-lib@npm%3A1.2.1#~/.yarn/patches/react-native-niimblue-lib-npm-1.2.1-693b4793a2.patch"
+  },
+  "devDependencies": {
+    "@expo/config-plugins": "^57.0.7",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "start:dev-client": "expo start --dev-client",
+    "android": "expo run:android",
+    "prebuild": "expo prebuild",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "private": true
+}
