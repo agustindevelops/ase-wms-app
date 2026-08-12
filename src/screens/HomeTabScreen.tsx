@@ -1,41 +1,21 @@
-import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme, type Colors } from '@/theme';
+import { Box } from '@/components/ui/box';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 
 export function HomeTabScreen() {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
-
   return (
-    <View style={styles.container}>
+    <Box className="flex-1 bg-background px-6 pt-12">
       <StatusBar style="dark" />
-      <Text style={styles.title}>Home</Text>
-      <Text style={styles.subtitle}>
-        Placeholder for inventory catalog. Use the Print tab for the D110 PoC.
-      </Text>
-    </View>
+      <VStack className="gap-2">
+        <Heading size="2xl" className="text-foreground">
+          Home
+        </Heading>
+        <Text size="sm" className="text-muted-foreground">
+          Placeholder for inventory catalog. Use the Print tab for the D110 PoC.
+        </Text>
+      </VStack>
+    </Box>
   );
-}
-
-function createStyles(colors: Colors) {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-      paddingHorizontal: 24,
-      paddingTop: 48,
-      gap: 8,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: colors.textMuted,
-      lineHeight: 20,
-    },
-  });
 }

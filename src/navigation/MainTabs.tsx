@@ -1,5 +1,4 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useTheme } from '@/theme';
 import { HomeTabScreen } from '@/screens/HomeTabScreen';
 import { PrintTabScreen } from '@/screens/PrintTabScreen';
 
@@ -10,19 +9,19 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-export function MainTabs() {
-  const { colors } = useTheme();
+const tabBarStyle = {
+  backgroundColor: '#ffffff',
+  borderTopColor: '#e5e5e5',
+};
 
+export function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.textPrimary,
-        tabBarInactiveTintColor: colors.textLabel,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
+        tabBarActiveTintColor: '#18181b',
+        tabBarInactiveTintColor: '#737373',
+        tabBarStyle,
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: '600',

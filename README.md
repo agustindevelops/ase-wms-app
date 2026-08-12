@@ -2,13 +2,16 @@
 
 Expo (SDK 57) warehouse app for Aniah Social Events. Companion to `ase-wms-web`.
 
+UI: [gluestack-ui](https://gluestack.io/) v5 with **UniWind** (Tailwind CSS v4).
+
 ## Structure
 
 ```
-App.tsx                         # ThemeProvider + AuthProvider + RootNavigator
+App.tsx                         # GluestackUIProvider + AuthProvider + RootNavigator
+global.css                      # UniWind theme tokens
 src/
+  components/ui/                # gluestack copy-paste components
   config/                       # env + printer constants
-  theme/                        # colors + ThemeProvider / useTheme
   auth/                         # stub AuthContext (Firebase in ASE-10)
   navigation/                   # auth vs unauth + MainTabs (Home | Print)
   screens/                      # thin tab screens that import features
@@ -18,13 +21,12 @@ src/
     scan/                       # index + ui/ + hook/
 ```
 
-Feature paradigm: **dumb `ui/`**, **handlers in `hook/`**, **`index` container** wires them. Tabs only import the feature entry.
+Feature paradigm: **dumb `ui/`**, **handlers in `hook/`**, **`index` container** wires them.
 
 ## Auth & navigation
 
 - Unauthenticated → Login (stub: any email/password)
 - Authenticated → bottom tabs: **Home** (placeholder) | **Print** (rightmost, D110 PoC)
-- Login is not a tab
 
 ## Print PoC (Print tab)
 
@@ -32,32 +34,30 @@ Feature paradigm: **dumb `ui/`**, **handlers in `hook/`**, **`index` container**
 2. Print Code 128 + digits or max QR + digits (`LABEL_ID` in `src/config/printer.ts`)
 3. Scan barcode / QR with the camera
 
-D110: 15×30 mm stock, `LabelType.WithGaps`, density `2`, canvas `96×240`.
-
 `react-native-niimblue-lib` hard-requires `@shopify/react-native-skia` at import time.
 This app stubs that package in `metro.config.js` / `stubs/`.
 
-## Stack
+## Add more gluestack components
 
-| Package | Role |
-|---|---|
-| Expo 57 + `expo-dev-client` | Native BLE (not Expo Go) |
-| `react-native-niimblue-lib` 1.2.1 | Label encode + print |
-| `react-native-ble-plx` 3.5.1 | BLE transport |
-| React Navigation | Auth stack + bottom tabs |
+```bash
+npx gluestack-ui@latest add alert -y
+```
+
+Components land in `src/components/ui/`.
 
 ## Requirements
 
 - Node 20+
 - Android device with USB debugging
-- JADENS / NIIMBOT D110 powered on
 - Expo development build (BLE will not work in Expo Go)
 
 ## Config
 
-Copy `.env.example` → `.env.local` for ASE-10 (`EXPO_PUBLIC_ASE_WMS_API_URL`, Firebase keys). Not required for the stub login / print PoC.
+Copy `.env.example` → `.env.local` for ASE-10. Not required for stub login / print PoC.
 
 ## Run on Android
+
+Native modules (gesture-handler, reanimated, svg) require a rebuild after install:
 
 ```bash
 npm install

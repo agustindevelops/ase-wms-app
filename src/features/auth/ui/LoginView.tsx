@@ -1,15 +1,10 @@
-import { useMemo } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme, type Colors } from '@/theme';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
+import { Input, InputField } from '@/components/ui/input';
+import { SafeAreaView } from '@/components/ui/safe-area-view';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import type { UseLoginResult } from '../hook/useLogin';
 
 export type LoginViewProps = UseLoginResult;
@@ -23,114 +18,55 @@ export function LoginView({
   setPassword,
   submit,
 }: LoginViewProps) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
-
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-background">
       <StatusBar style="dark" />
-      <View style={styles.container}>
-        <Text style={styles.title}>ASE WMS</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
+      <VStack className="flex-1 px-6 pt-12 gap-3.5">
+        <Heading size="2xl" className="text-foreground">
+          ASE WMS
+        </Heading>
+        <Text size="sm" className="text-muted-foreground mb-2">
+          Sign in to continue
+        </Text>
 
-        <TextInput
-          style={styles.input}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-          placeholder="Email"
-          placeholderTextColor={colors.textLabel}
-          value={email}
-          onChangeText={setEmail}
-          editable={!busy}
-        />
-        <TextInput
-          style={styles.input}
-          autoCapitalize="none"
-          placeholder="Password"
-          placeholderTextColor={colors.textLabel}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          editable={!busy}
-        />
+        <Input>
+          <InputField
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            editable={!busy}
+          />
+        </Input>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <Input>
+          <InputField
+            autoCapitalize="none"
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            editable={!busy}
+          />
+        </Input>
 
-        {busy ? <ActivityIndicator size="large" color={colors.text} /> : null}
+        {error ? (
+          <Text size="sm" className="text-destructive">
+            {error}
+          </Text>
+        ) : null}
 
-        <Pressable
-          style={[styles.button, busy && styles.buttonDisabled]}
-          onPress={submit}
-          disabled={busy}
-        >
-          <Text style={styles.buttonText}>Sign in</Text>
-        </Pressable>
+        <Button className="mt-1" onPress={submit} disabled={busy}>
+          {busy ? <ButtonSpinner /> : null}
+          <ButtonText>Sign in</ButtonText>
+        </Button>
 
-        <Text style={styles.hint}>
+        <Text size="sm" className="text-muted-foreground mt-2">
           Stub login — any email and password works until Firebase (ASE-10).
         </Text>
-      </View>
+      </VStack>
     </SafeAreaView>
   );
-}
-
-function createStyles(colors: Colors) {
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    container: {
-      flex: 1,
-      paddingHorizontal: 24,
-      paddingTop: 48,
-      gap: 14,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: colors.textMuted,
-      marginBottom: 8,
-    },
-    input: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      fontSize: 16,
-      color: colors.textPrimary,
-    },
-    error: {
-      fontSize: 14,
-      color: '#b91c1c',
-    },
-    button: {
-      backgroundColor: colors.buttonPrimary,
-      borderRadius: 10,
-      paddingVertical: 14,
-      alignItems: 'center',
-      marginTop: 4,
-    },
-    buttonDisabled: {
-      opacity: 0.45,
-    },
-    buttonText: {
-      color: colors.buttonText,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    hint: {
-      fontSize: 13,
-      color: colors.textLabel,
-      lineHeight: 18,
-      marginTop: 8,
-    },
-  });
 }

@@ -1,15 +1,14 @@
-import { useMemo } from 'react';
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme, type Colors } from '@/theme';
+import { Box } from '@/components/ui/box';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Divider } from '@/components/ui/divider';
+import { Heading } from '@/components/ui/heading';
+import { SafeAreaView } from '@/components/ui/safe-area-view';
+import { Spinner } from '@/components/ui/spinner';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import type { UsePrintResult } from '../hook/usePrint';
 
 export type PrintViewProps = Omit<
@@ -29,167 +28,85 @@ export function PrintView({
   openBarcodeScanner,
   openQrScanner,
 }: PrintViewProps) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
-
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-background">
       <StatusBar style="dark" />
-      <View style={styles.container}>
-        <Text style={styles.title}>D110 Print PoC</Text>
-        <Text style={styles.subtitle}>
+      <VStack className="flex-1 px-6 pt-8 gap-3.5">
+        <Heading size="2xl" className="text-foreground">
+          D110 Print PoC
+        </Heading>
+        <Text size="sm" className="text-muted-foreground mb-1">
           Print · scan Code 128 · scan QR · ID {labelId}
         </Text>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Status</Text>
-          <Text style={styles.value}>
+        <Card className="p-4 gap-2 border border-border bg-card">
+          <Text size="xs" bold className="text-muted-foreground uppercase">
+            Status
+          </Text>
+          <Text size="md" bold className="text-foreground">
             {deviceName ? `Connected: ${deviceName}` : 'Not connected'}
           </Text>
           {printerSummary ? (
-            <Text style={styles.meta}>{printerSummary}</Text>
+            <Text size="sm" className="text-muted-foreground">
+              {printerSummary}
+            </Text>
           ) : null}
-          <Text style={styles.message}>{message}</Text>
-          <Text style={styles.id}>ID: {labelId}</Text>
-        </View>
-
-        {busy ? <ActivityIndicator size="large" color={colors.text} /> : null}
-
-        <Pressable
-          style={[styles.button, busy && styles.buttonDisabled]}
-          onPress={connect}
-          disabled={busy}
-        >
-          <Text style={styles.buttonText}>
-            {deviceName ? 'Reconnect printer' : 'Connect printer'}
+          <Text size="sm" className="text-muted-foreground leading-5">
+            {message}
           </Text>
-        </Pressable>
+          <Text
+            size="sm"
+            className="text-foreground"
+            style={{
+              fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
+            }}
+          >
+            ID: {labelId}
+          </Text>
+        </Card>
 
-        <Pressable
-          style={[
-            styles.button,
-            styles.buttonPrimary,
-            (busy || !deviceName) && styles.buttonDisabled,
-          ]}
+        {busy ? <Spinner size="large" /> : null}
+
+        <Button variant="secondary" onPress={connect} disabled={busy}>
+          <ButtonText>
+            {deviceName ? 'Reconnect printer' : 'Connect printer'}
+          </ButtonText>
+        </Button>
+
+        <Button
+          variant="default"
           onPress={printBarcode}
           disabled={busy || !deviceName}
         >
-          <Text style={styles.buttonText}>Print Code 128 + digits</Text>
-        </Pressable>
+          <ButtonText>Print Code 128 + digits</ButtonText>
+        </Button>
 
-        <Pressable
-          style={[
-            styles.button,
-            styles.buttonPrimary,
-            (busy || !deviceName) && styles.buttonDisabled,
-          ]}
+        <Button
+          variant="default"
           onPress={printQr}
           disabled={busy || !deviceName}
         >
-          <Text style={styles.buttonText}>Print max QR + digits</Text>
-        </Pressable>
+          <ButtonText>Print max QR + digits</ButtonText>
+        </Button>
 
-        <View style={styles.divider} />
+        <Divider className="my-1" />
 
-        <Pressable
-          style={[styles.button, styles.buttonScan, busy && styles.buttonDisabled]}
+        <Button
+          className="bg-green-900 data-[hover=true]:bg-green-900/90 data-[active=true]:bg-green-900/90"
           onPress={openBarcodeScanner}
           disabled={busy}
         >
-          <Text style={styles.buttonText}>Scan barcode</Text>
-        </Pressable>
+          <ButtonText>Scan barcode</ButtonText>
+        </Button>
 
-        <Pressable
-          style={[styles.button, styles.buttonScan, busy && styles.buttonDisabled]}
+        <Button
+          className="bg-green-900 data-[hover=true]:bg-green-900/90 data-[active=true]:bg-green-900/90"
           onPress={openQrScanner}
           disabled={busy}
         >
-          <Text style={styles.buttonText}>Scan QR code</Text>
-        </Pressable>
-      </View>
+          <ButtonText>Scan QR code</ButtonText>
+        </Button>
+      </VStack>
     </SafeAreaView>
   );
-}
-
-function createStyles(colors: Colors) {
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    container: {
-      flex: 1,
-      paddingHorizontal: 24,
-      paddingTop: 32,
-      gap: 14,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: colors.textMuted,
-      marginBottom: 4,
-    },
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 16,
-      gap: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    label: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textLabel,
-      textTransform: 'uppercase',
-    },
-    value: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    meta: {
-      fontSize: 13,
-      color: colors.textSecondary,
-    },
-    message: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 20,
-    },
-    id: {
-      fontSize: 14,
-      fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
-      color: colors.text,
-    },
-    button: {
-      backgroundColor: colors.button,
-      borderRadius: 10,
-      paddingVertical: 14,
-      alignItems: 'center',
-    },
-    buttonPrimary: {
-      backgroundColor: colors.buttonPrimary,
-    },
-    buttonScan: {
-      backgroundColor: colors.buttonScan,
-    },
-    buttonDisabled: {
-      opacity: 0.45,
-    },
-    buttonText: {
-      color: colors.buttonText,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    divider: {
-      height: 1,
-      backgroundColor: colors.border,
-      marginVertical: 4,
-    },
-  });
 }

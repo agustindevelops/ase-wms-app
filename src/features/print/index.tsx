@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Scan } from '@/features/scan';
-import { useTheme } from '@/theme';
 import { usePrint } from './hook/usePrint';
 import { PrintView } from './ui/PrintView';
+
+const visibleTabBarStyle = {
+  backgroundColor: '#ffffff',
+  borderTopColor: '#e5e5e5',
+};
 
 /** Print feature container — wires hook handlers into dumb UI. */
 export function Print() {
   const navigation = useNavigation();
-  const { colors } = useTheme();
   const {
     scannerKind,
     closeScanner,
@@ -29,23 +32,13 @@ export function Print() {
     if (!parent) return;
 
     parent.setOptions({
-      tabBarStyle: scannerKind
-        ? { display: 'none' }
-        : {
-            backgroundColor: colors.surface,
-            borderTopColor: colors.border,
-          },
+      tabBarStyle: scannerKind ? { display: 'none' } : visibleTabBarStyle,
     });
 
     return () => {
-      parent.setOptions({
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-      });
+      parent.setOptions({ tabBarStyle: visibleTabBarStyle });
     };
-  }, [scannerKind, navigation, colors.surface, colors.border]);
+  }, [scannerKind, navigation]);
 
   if (scannerKind) {
     return <Scan kind={scannerKind} onClose={closeScanner} />;

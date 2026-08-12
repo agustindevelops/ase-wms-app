@@ -1,19 +1,17 @@
-import { useMemo } from 'react';
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Platform, StyleSheet, View } from 'react-native';
 import {
   CameraView,
   type BarcodeScanningResult,
   type PermissionResponse,
 } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme, type Colors } from '@/theme';
+import { Box } from '@/components/ui/box';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Heading } from '@/components/ui/heading';
+import { SafeAreaView } from '@/components/ui/safe-area-view';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import type { ScanConfig, ScannerKind } from '../hook/useScan';
 
 export type ScanViewProps = {
@@ -37,40 +35,41 @@ export function ScanView({
   scanAgain,
   onClose,
 }: ScanViewProps) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
-
   if (!permission) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <Text style={styles.message}>Checking camera permission…</Text>
+      <SafeAreaView className="flex-1 bg-background justify-center p-6">
+        <Text size="md" className="text-muted-foreground">
+          Checking camera permission…
+        </Text>
       </SafeAreaView>
     );
   }
 
   if (!permission.granted) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView className="flex-1 bg-background justify-center p-6">
         <StatusBar style="dark" />
-        <View style={styles.permissionBox}>
-          <Text style={styles.title}>{config.title}</Text>
-          <Text style={styles.message}>
+        <VStack className="gap-3.5">
+          <Heading size="xl" className="text-foreground">
+            {config.title}
+          </Heading>
+          <Text size="md" className="text-muted-foreground leading-6">
             Camera access is required to scan{' '}
             {kind === 'qr' ? 'QR codes' : 'barcodes'}.
           </Text>
-          <Pressable style={styles.button} onPress={requestPermission}>
-            <Text style={styles.buttonText}>Allow camera</Text>
-          </Pressable>
-          <Pressable style={styles.buttonSecondary} onPress={onClose}>
-            <Text style={styles.buttonSecondaryText}>Back</Text>
-          </Pressable>
-        </View>
+          <Button variant="default" onPress={requestPermission}>
+            <ButtonText>Allow camera</ButtonText>
+          </Button>
+          <Button variant="secondary" onPress={onClose}>
+            <ButtonText>Back</ButtonText>
+          </Button>
+        </VStack>
       </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.cameraRoot}>
+    <View className="flex-1 bg-black">
       <StatusBar style="light" />
       <CameraView
         style={StyleSheet.absoluteFill}
@@ -79,152 +78,60 @@ export function ScanView({
         onBarcodeScanned={result ? undefined : onBarcodeScanned}
       />
 
-      <SafeAreaView style={styles.overlay}>
-        <View style={styles.topBar}>
-          <Text style={styles.overlayTitle}>{config.title}</Text>
-          <Text style={styles.overlayHint}>{config.hint}</Text>
-        </View>
+      <SafeAreaView className="flex-1 justify-between">
+        <VStack className="px-5 pt-3 gap-1">
+          <Heading size="xl" className="text-white">
+            {config.title}
+          </Heading>
+          <Text size="sm" className="text-zinc-300">
+            {config.hint}
+          </Text>
+        </VStack>
 
-        <View style={styles.frame} />
+        <Box className="self-center w-[72%] aspect-square border-2 border-white/85 rounded-xl bg-transparent" />
 
-        <View style={styles.bottomBar}>
+        <VStack className="px-5 pb-5 gap-3">
           {result ? (
-            <View style={styles.resultCard}>
-              <Text style={styles.resultLabel}>Scanned ({result.type})</Text>
-              <Text style={styles.resultData} selectable>
+            <Card className="p-4 gap-2.5 bg-card">
+              <Text size="xs" bold className="text-muted-foreground uppercase">
+                Scanned ({result.type})
+              </Text>
+              <Text
+                size="xl"
+                bold
+                selectable
+                className="text-foreground"
+                style={{
+                  fontFamily: Platform.select({
+                    ios: 'Menlo',
+                    android: 'monospace',
+                  }),
+                }}
+              >
                 {result.data}
               </Text>
-              <View style={styles.resultActions}>
-                <Pressable style={styles.button} onPress={scanAgain}>
-                  <Text style={styles.buttonText}>Scan again</Text>
-                </Pressable>
-                <Pressable style={styles.buttonSecondaryLight} onPress={onClose}>
-                  <Text style={styles.buttonSecondaryTextLight}>Done</Text>
-                </Pressable>
-              </View>
-            </View>
+              <VStack className="gap-2.5 mt-1">
+                <Button variant="default" onPress={scanAgain}>
+                  <ButtonText>Scan again</ButtonText>
+                </Button>
+                <Button
+                  className="bg-white/20 data-[hover=true]:bg-white/30"
+                  onPress={onClose}
+                >
+                  <ButtonText className="text-white">Done</ButtonText>
+                </Button>
+              </VStack>
+            </Card>
           ) : (
-            <Pressable style={styles.buttonSecondaryLight} onPress={onClose}>
-              <Text style={styles.buttonSecondaryTextLight}>Cancel</Text>
-            </Pressable>
+            <Button
+              className="bg-white/20 data-[hover=true]:bg-white/30"
+              onPress={onClose}
+            >
+              <ButtonText className="text-white">Cancel</ButtonText>
+            </Button>
           )}
-        </View>
+        </VStack>
       </SafeAreaView>
     </View>
   );
-}
-
-function createStyles(colors: Colors) {
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-      justifyContent: 'center',
-      padding: 24,
-    },
-    permissionBox: {
-      gap: 14,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    message: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      lineHeight: 22,
-    },
-    cameraRoot: {
-      flex: 1,
-      backgroundColor: colors.cameraBackground,
-    },
-    overlay: {
-      flex: 1,
-      justifyContent: 'space-between',
-    },
-    topBar: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      gap: 4,
-    },
-    overlayTitle: {
-      color: colors.buttonText,
-      fontSize: 22,
-      fontWeight: '700',
-    },
-    overlayHint: {
-      color: colors.overlayHint,
-      fontSize: 14,
-    },
-    frame: {
-      alignSelf: 'center',
-      width: '72%',
-      aspectRatio: 1,
-      borderWidth: 2,
-      borderColor: colors.frameBorder,
-      borderRadius: 12,
-      backgroundColor: 'transparent',
-    },
-    bottomBar: {
-      paddingHorizontal: 20,
-      paddingBottom: 20,
-      gap: 12,
-    },
-    resultCard: {
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 16,
-      gap: 10,
-    },
-    resultLabel: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textLabel,
-      textTransform: 'uppercase',
-    },
-    resultData: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.textPrimary,
-      fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
-    },
-    resultActions: {
-      gap: 10,
-      marginTop: 4,
-    },
-    button: {
-      backgroundColor: colors.buttonPrimary,
-      borderRadius: 10,
-      paddingVertical: 14,
-      alignItems: 'center',
-    },
-    buttonText: {
-      color: colors.buttonText,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    buttonSecondary: {
-      backgroundColor: colors.buttonSecondary,
-      borderRadius: 10,
-      paddingVertical: 14,
-      alignItems: 'center',
-    },
-    buttonSecondaryText: {
-      color: colors.textPrimary,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    buttonSecondaryLight: {
-      backgroundColor: colors.buttonSecondaryLight,
-      borderRadius: 10,
-      paddingVertical: 14,
-      alignItems: 'center',
-    },
-    buttonSecondaryTextLight: {
-      color: colors.buttonText,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-  });
 }
