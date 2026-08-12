@@ -10,7 +10,7 @@
     "react": "19.2.3",
     "react-native": "0.86.2",
     "react-native-ble-plx": "3.5.1",
-    "react-native-niimblue-lib": "patch:react-native-niimblue-lib@npm%3A1.2.1#~/.yarn/patches/react-native-niimblue-lib-npm-1.2.1-693b4793a2.patch"
+    "react-native-niimblue-lib": "1.2.1"
   },
   "devDependencies": {
     "@expo/config-plugins": "^57.0.7",
