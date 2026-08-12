@@ -1,73 +1,121 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import 'uniwind';
-/* ─── UniWind theme variants ─────────────────────────────────────
-   Switched at runtime via Uniwind.setTheme('light' | 'dark' | 'adaptive').
-   Variable values match the nativewind config.ts tokens so that the
-   same Tailwind utility classes (bg-primary, text-foreground, etc.)
-   produce identical output regardless of styling engine.                */
+
+/*
+  Aniah Social Events brand tokens (from aniah-social-events tailwind.config.ts).
+  UniWind theme vars must be --color-* hex values (not rgb channel + @theme inline).
+*/
 @layer theme {
   :root {
     @variant light {
-      --primary: 23 23 23;
-      --primary-foreground: 250 250 250;
-      --card: 255 255 255;
-      --secondary: 245 245 245;
-      --secondary-foreground: 23 23 23;
-      --background: 255 255 255;
-      --popover: 255 255 255;
-      --popover-foreground: 10 10 10;
-      --muted: 245 245 245;
-      --muted-foreground: 115 115 115;
-      --destructive: 231 0 11;
-      --foreground: 10 10 10;
-      --border: 229 229 229;
-      --input: 229 229 229;
-      --ring: 212 212 212;
-      --accent: 247 247 247;
-      --accent-foreground: 52 52 52;
+      --color-background: #fffcf9;
+      --color-foreground: #473b33;
+      --color-card: #ffffff;
+      --color-card-foreground: #473b33;
+      --color-popover: #ffffff;
+      --color-popover-foreground: #473b33;
+      --color-primary: #7e9570;
+      --color-primary-foreground: #ffffff;
+      --color-secondary: #f0eae4;
+      --color-secondary-foreground: #473b33;
+      --color-muted: #f9f7f4;
+      --color-muted-foreground: #a89583;
+      --color-accent: #ff785e;
+      --color-accent-foreground: #ffffff;
+      --color-destructive: #ce6b69;
+      --color-destructive-foreground: #ffffff;
+      --color-border: #e2d6c7;
+      --color-input: #e2d6c7;
+      --color-ring: #7e9570;
+
+      /* Brand scale utilities: bg-cream, text-brown-500, bg-peach-500, bg-green-700 */
+      --color-cream: #fffcf9;
+      --color-brown-50: #f9f7f4;
+      --color-brown-100: #f0eae4;
+      --color-brown-200: #e2d6c7;
+      --color-brown-300: #d2c1aa;
+      --color-brown-400: #c0aa91;
+      --color-brown-500: #a89583;
+      --color-brown-600: #8f7d6e;
+      --color-brown-700: #766659;
+      --color-brown-800: #5e5045;
+      --color-brown-900: #473b33;
+      --color-peach-50: #fff3f2;
+      --color-peach-100: #ffe2df;
+      --color-peach-200: #ffcfc8;
+      --color-peach-300: #ffb0a1;
+      --color-peach-400: #ff9278;
+      --color-peach-500: #ff785e;
+      --color-peach-600: #f25a40;
+      --color-peach-700: #d44932;
+      --color-green-50: #f4f7f1;
+      --color-green-100: #e3eade;
+      --color-green-200: #d0ddc8;
+      --color-green-300: #bccdb1;
+      --color-green-400: #9db18f;
+      --color-green-500: #7e9570;
+      --color-green-600: #677a5b;
+      --color-green-700: #56674a;
+      --color-green-800: #445239;
+      --color-green-900: #333e2a;
+      --color-coral: #ce6b69;
+      --color-coral-hover: #b85a57;
+      --color-blush: #f9f1ec;
     }
 
     @variant dark {
-      --primary: 255 245 245;
-      --primary-foreground: 23 23 23;
-      --card: 23 23 23;
-      --secondary: 38 38 38;
-      --secondary-foreground: 250 250 250;
-      --background: 10 10 10;
-      --popover: 23 23 23;
-      --popover-foreground: 250 250 250;
-      --muted: 38 38 38;
-      --muted-foreground: 161 161 161;
-      --destructive: 255 100 103;
-      --foreground: 250 250 250;
-      --border: 46 46 46;
-      --input: 46 46 46;
-      --accent: 38 38 38;
-      --accent-foreground: 250 250 250;
-      --ring: 115 115 115;
+      --color-background: #2a2420;
+      --color-foreground: #fffcf9;
+      --color-card: #3a322c;
+      --color-card-foreground: #fffcf9;
+      --color-popover: #3a322c;
+      --color-popover-foreground: #fffcf9;
+      --color-primary: #9db18f;
+      --color-primary-foreground: #1a1f16;
+      --color-secondary: #473b33;
+      --color-secondary-foreground: #fffcf9;
+      --color-muted: #3a322c;
+      --color-muted-foreground: #c0aa91;
+      --color-accent: #ff9278;
+      --color-accent-foreground: #1a1f16;
+      --color-destructive: #ce6b69;
+      --color-destructive-foreground: #ffffff;
+      --color-border: #5e5045;
+      --color-input: #5e5045;
+      --color-ring: #9db18f;
+
+      --color-cream: #2a2420;
+      --color-brown-50: #3a322c;
+      --color-brown-100: #473b33;
+      --color-brown-200: #5e5045;
+      --color-brown-300: #766659;
+      --color-brown-400: #8f7d6e;
+      --color-brown-500: #a89583;
+      --color-brown-600: #c0aa91;
+      --color-brown-700: #d2c1aa;
+      --color-brown-800: #e2d6c7;
+      --color-brown-900: #f9f7f4;
+      --color-peach-50: #3a2420;
+      --color-peach-100: #5a3028;
+      --color-peach-200: #7a2415;
+      --color-peach-300: #a93723;
+      --color-peach-400: #d44932;
+      --color-peach-500: #ff785e;
+      --color-peach-600: #ff9278;
+      --color-peach-700: #ffb0a1;
+      --color-green-50: #1a1f16;
+      --color-green-100: #333e2a;
+      --color-green-200: #445239;
+      --color-green-300: #56674a;
+      --color-green-400: #677a5b;
+      --color-green-500: #7e9570;
+      --color-green-600: #9db18f;
+      --color-green-700: #bccdb1;
+      --color-green-800: #d0ddc8;
+      --color-green-900: #e3eade;
+      --color-coral: #ce6b69;
+      --color-coral-hover: #ff9278;
+      --color-blush: #3a322c;
     }
   }
-}
-
-/* ─── Tailwind v4 color mappings ─────────────────────────────────
-   Maps the theme CSS variables above to Tailwind color utilities.
-   bg-primary → rgb(var(--primary)), text-foreground → rgb(var(--foreground)), etc. */
-@theme inline {
-  --color-primary: rgb(var(--primary));
-  --color-primary-foreground: rgb(var(--primary-foreground));
-  --color-card: rgb(var(--card));
-  --color-secondary: rgb(var(--secondary));
-  --color-secondary-foreground: rgb(var(--secondary-foreground));
-  --color-background: rgb(var(--background));
-  --color-popover: rgb(var(--popover));
-  --color-popover-foreground: rgb(var(--popover-foreground));
-  --color-muted: rgb(var(--muted));
-  --color-muted-foreground: rgb(var(--muted-foreground));
-  --color-destructive: rgb(var(--destructive));
-  --color-foreground: rgb(var(--foreground));
-  --color-border: rgb(var(--border));
-  --color-input: rgb(var(--input));
-  --color-ring: rgb(var(--ring));
-  --color-accent: rgb(var(--accent));
-  --color-accent-foreground: rgb(var(--accent-foreground));
 }

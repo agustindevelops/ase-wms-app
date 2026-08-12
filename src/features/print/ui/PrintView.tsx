@@ -29,13 +29,13 @@ export function PrintView({
   openQrScanner,
 }: PrintViewProps) {
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-cream">
       <StatusBar style="dark" />
       <VStack className="flex-1 px-6 pt-8 gap-3.5">
-        <Heading size="2xl" className="text-foreground">
+        <Heading size="2xl" className="text-brown-900">
           D110 Print PoC
         </Heading>
-        <Text size="sm" className="text-muted-foreground mb-1">
+        <Text size="sm" className="text-brown-500 mb-1">
           Print · scan Code 128 · scan QR · ID {labelId}
         </Text>
 
@@ -65,7 +65,7 @@ export function PrintView({
           </Text>
         </Card>
 
-        {busy ? <Spinner size="large" /> : null}
+        {busy ? <Spinner size="large" color="#7e9570" /> : null}
 
         <Button variant="secondary" onPress={connect} disabled={busy}>
           <ButtonText>
@@ -92,7 +92,7 @@ export function PrintView({
         <Divider className="my-1" />
 
         <Button
-          className="bg-green-900 data-[hover=true]:bg-green-900/90 data-[active=true]:bg-green-900/90"
+          className="bg-green-700 data-[hover=true]:bg-green-800 data-[active=true]:bg-green-800"
           onPress={openBarcodeScanner}
           disabled={busy}
         >
@@ -100,7 +100,7 @@ export function PrintView({
         </Button>
 
         <Button
-          className="bg-green-900 data-[hover=true]:bg-green-900/90 data-[active=true]:bg-green-900/90"
+          className="bg-green-700 data-[hover=true]:bg-green-800 data-[active=true]:bg-green-800"
           onPress={openQrScanner}
           disabled={busy}
         >

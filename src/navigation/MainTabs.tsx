@@ -9,9 +9,10 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+/** Matches ASE cream / brown / green light theme. */
 const tabBarStyle = {
-  backgroundColor: '#ffffff',
-  borderTopColor: '#e5e5e5',
+  backgroundColor: '#FFFCF9',
+  borderTopColor: '#e2d6c7',
 };
 
 export function MainTabs() {
@@ -19,8 +20,8 @@ export function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#18181b',
-        tabBarInactiveTintColor: '#737373',
+        tabBarActiveTintColor: '#7e9570',
+        tabBarInactiveTintColor: '#a89583',
         tabBarStyle,
         tabBarLabelStyle: {
           fontSize: 14,

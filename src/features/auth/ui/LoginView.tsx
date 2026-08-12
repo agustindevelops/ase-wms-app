@@ -19,13 +19,13 @@ export function LoginView({
   submit,
 }: LoginViewProps) {
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-cream">
       <StatusBar style="dark" />
       <VStack className="flex-1 px-6 pt-12 gap-3.5">
-        <Heading size="2xl" className="text-foreground">
+        <Heading size="2xl" className="text-brown-900">
           ASE WMS
         </Heading>
-        <Text size="sm" className="text-muted-foreground mb-2">
+        <Text size="sm" className="text-brown-500 mb-2">
           Sign in to continue
         </Text>
 
@@ -63,7 +63,7 @@ export function LoginView({
           <ButtonText>Sign in</ButtonText>
         </Button>
 
-        <Text size="sm" className="text-muted-foreground mt-2">
+        <Text size="sm" className="text-brown-500 mt-2">
           Stub login — any email and password works until Firebase (ASE-10).
         </Text>
       </VStack>

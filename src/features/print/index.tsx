@@ -5,8 +5,8 @@ import { usePrint } from './hook/usePrint';
 import { PrintView } from './ui/PrintView';
 
 const visibleTabBarStyle = {
-  backgroundColor: '#ffffff',
-  borderTopColor: '#e5e5e5',
+  backgroundColor: '#FFFCF9',
+  borderTopColor: '#e2d6c7',
 };
 
 /** Print feature container — wires hook handlers into dumb UI. */
