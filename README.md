@@ -1,64 +1,78 @@
-# ASE WMS — D110 barcode print PoC
+# ASE WMS — Mobile app
 
-Minimal React Native (Expo) Android app for a JADENS / NIIMBOT D110:
+Expo (SDK 57) warehouse app for Aniah Social Events. Companion to `ase-wms-web`.
 
-1. Request Bluetooth permissions and connect over BLE
-2. Verify negotiation (`modelId`, metadata, print task)
-3. Print a diagnostic black line (`96×240` landscape)
-4. Print a UUID QR + short Code 128 asset code
+## Structure
 
-D110 config: 15×30 mm stock, `LabelType.WithGaps`, density `2`, printable `96×240`, packet interval `15 ms`.
+```
+App.tsx                         # ThemeProvider + AuthProvider + RootNavigator
+src/
+  config/                       # env + printer constants
+  theme/                        # colors + ThemeProvider / useTheme
+  auth/                         # stub AuthContext (Firebase in ASE-10)
+  navigation/                   # auth vs unauth + MainTabs (Home | Print)
+  screens/                      # thin tab screens that import features
+  features/
+    auth/                       # index + ui/ + hook/
+    print/                      # index + ui/ + hook/ + labels/
+    scan/                       # index + ui/ + hook/
+```
+
+Feature paradigm: **dumb `ui/`**, **handlers in `hook/`**, **`index` container** wires them. Tabs only import the feature entry.
+
+## Auth & navigation
+
+- Unauthenticated → Login (stub: any email/password)
+- Authenticated → bottom tabs: **Home** (placeholder) | **Print** (rightmost, D110 PoC)
+- Login is not a tab
+
+## Print PoC (Print tab)
+
+1. Connect to JADENS / NIIMBOT D110 over BLE
+2. Print Code 128 + digits or max QR + digits (`LABEL_ID` in `src/config/printer.ts`)
+3. Scan barcode / QR with the camera
+
+D110: 15×30 mm stock, `LabelType.WithGaps`, density `2`, canvas `96×240`.
 
 `react-native-niimblue-lib` hard-requires `@shopify/react-native-skia` at import time.
-This PoC stubs that package in `metro.config.js` / `stubs/` so QR/barcodes work without native Skia.
+This app stubs that package in `metro.config.js` / `stubs/`.
 
 ## Stack
 
-| Package | Version | Role |
-|---|---|---|
-| `react-native-niimblue-lib` | `1.2.1` (pinned) | Label encode + print task |
-| `react-native-ble-plx` | `3.5.1` (pinned) | BLE transport |
-| `expo-dev-client` | Expo 57 | Native BLE (not Expo Go) |
+| Package | Role |
+|---|---|
+| Expo 57 + `expo-dev-client` | Native BLE (not Expo Go) |
+| `react-native-niimblue-lib` 1.2.1 | Label encode + print |
+| `react-native-ble-plx` 3.5.1 | BLE transport |
+| React Navigation | Auth stack + bottom tabs |
 
 ## Requirements
 
 - Node 20+
-- Android device with USB debugging (or wireless ADB)
+- Android device with USB debugging
 - JADENS / NIIMBOT D110 powered on
 - Expo development build (BLE will not work in Expo Go)
 
+## Config
+
+Copy `.env.example` → `.env.local` for ASE-10 (`EXPO_PUBLIC_ASE_WMS_API_URL`, Firebase keys). Not required for the stub login / print PoC.
+
 ## Run on Android
 
-**BLE printing does not work in Expo Go.** Use a development build:
-
 ```bash
-yarn
-yarn android
+npm install
+npm run android
 ```
 
-That generates the native project, installs a development build on the device, and launches the app.
-
-On later runs:
+Later sessions:
 
 ```bash
-yarn start:dev-client
-# then open the installed "ase-wms-app" / Expo Dev Client on the phone
+npm run start:dev-client
 ```
-
-`yarn start` opens the normal Expo Go flow (UI only — no printer).
 
 ## Test steps
 
-1. Enable Bluetooth and Location on the phone (Android needs location for BLE scan).
-2. Power on the D110.
-3. Tap **Connect printer**.
-4. Grant Bluetooth / location prompts.
-5. Tap **Print barcode**.
-
-Default barcode value: `A7K4P9X2` (short Code 128 for a 30×15 mm label).
-
-## Notes
-
-- Change `DEMO_BARCODE` in `App.tsx` to print a different value.
-- Label canvas is `240×120` px (~30×15 mm @ 203 DPI).
-- This library is unofficial; versions are pinned on purpose.
+1. Sign in with any email and password (stub).
+2. Open the **Print** tab.
+3. Enable Bluetooth and Location; power on the D110.
+4. Tap **Connect printer**, then print / scan as before.
