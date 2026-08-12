@@ -53,7 +53,7 @@ export function LoginView({
         </Input>
 
         {error ? (
-          <Text size="sm" className="text-destructive">
+          <Text size="sm" bold className="text-destructive">
             {error}
           </Text>
         ) : null}
@@ -62,10 +62,6 @@ export function LoginView({
           {busy ? <ButtonSpinner /> : null}
           <ButtonText>Sign in</ButtonText>
         </Button>
-
-        <Text size="sm" className="text-brown-500 mt-2">
-          Stub login — any email and password works until Firebase (ASE-10).
-        </Text>
       </VStack>
     </SafeAreaView>
   );

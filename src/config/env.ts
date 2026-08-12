@@ -1,4 +1,4 @@
-/** Public env — 12-factor config. Values unused until ASE-10. */
+/** Public env — 12-factor config (Expo `EXPO_PUBLIC_*`). */
 
 export const aseWmsApiUrl = process.env.EXPO_PUBLIC_ASE_WMS_API_URL ?? '';
 

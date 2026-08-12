@@ -7,13 +7,14 @@ UI: [gluestack-ui](https://gluestack.io/) v5 with **UniWind** (Tailwind CSS v4).
 ## Structure
 
 ```
-App.tsx                         # GluestackUIProvider + AuthProvider + RootNavigator
+App.tsx                         # GluestackUIProvider + RootNavigator
 global.css                      # UniWind theme tokens
 src/
   components/ui/                # gluestack copy-paste components
   config/                       # env + printer constants
-  auth/                         # stub AuthContext (Firebase in ASE-10)
-  navigation/                   # auth vs unauth + MainTabs (Home | Print)
+  firebase/                     # SDK init + signIn/signOut (no auth context)
+  api/                          # wmsFetch (Bearer via getIdToken) + /api/me
+  navigation/                   # onAuthStateChanged gate + MainTabs (Home | Print)
   screens/                      # thin tab screens that import features
   features/
     auth/                       # index + ui/ + hook/
@@ -25,8 +26,9 @@ Feature paradigm: **dumb `ui/`**, **handlers in `hook/`**, **`index` container**
 
 ## Auth & navigation
 
-- Unauthenticated → Login (stub: any email/password)
-- Authenticated → bottom tabs: **Home** (placeholder) | **Print** (rightmost, D110 PoC)
+- Firebase Auth (same project as `ase-wms-web`); session owned by the SDK
+- Unauthenticated → Login (email/password)
+- Authenticated → bottom tabs: **Home** (`GET /api/me` smoke) | **Print** (D110 PoC)
 
 ## Print PoC (Print tab)
 
