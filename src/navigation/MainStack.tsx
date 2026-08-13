@@ -1,4 +1,14 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  CatalogDetails,
+  CatalogGlue,
+  CatalogItemList,
+  CatalogMenu,
+  CatalogPhoto,
+  CatalogPrintQr,
+  CatalogScanItem,
+  CatalogScanLocation,
+} from '@/features/catalog';
 import { LocationUnitForm } from '@/features/manageWarehouse/LocationUnitForm';
 import { PrintLocationLabel } from '@/features/manageWarehouse/PrintLocationLabel';
 import { WarehouseForm } from '@/features/manageWarehouse/WarehouseForm';
@@ -59,6 +69,53 @@ export function MainStack() {
             ? `Print ${route.params.locationName}`
             : 'Print Label',
         })}
+      />
+      <Stack.Screen
+        name="CatalogMenu"
+        component={CatalogMenu}
+        options={{ title: 'Catalog' }}
+      />
+      <Stack.Screen
+        name="CatalogPhoto"
+        component={CatalogPhoto}
+        options={{ title: 'Catalog · Photo' }}
+      />
+      <Stack.Screen
+        name="CatalogItemList"
+        component={CatalogItemList}
+        options={({ route }) => ({
+          title:
+            route.params.mode === 'add'
+              ? 'Add to warehouse'
+              : route.params.mode === 'move'
+                ? 'Move item'
+                : 'Remove from location',
+        })}
+      />
+      <Stack.Screen
+        name="CatalogScanItem"
+        component={CatalogScanItem}
+        options={{ title: 'Scan item', headerShown: false }}
+      />
+      <Stack.Screen
+        name="CatalogDetails"
+        component={CatalogDetails}
+        options={{ title: 'Catalog · Details' }}
+      />
+      <Stack.Screen
+        name="CatalogPrintQr"
+        component={CatalogPrintQr}
+        options={{ title: 'Catalog · Print QR' }}
+      />
+      <Stack.Screen
+        name="CatalogGlue"
+        component={CatalogGlue}
+        options={{ title: 'Catalog · Attach QR' }}
+      />
+      <Stack.Screen
+        name="CatalogScanLocation"
+        component={CatalogScanLocation}
+        options={{ title: 'Catalog · Location', headerShown: false }}
       />
       <Stack.Screen
         name="PrintPoC"

@@ -8,7 +8,6 @@ import { VStack } from '@/components/ui/vstack';
 import type { UseMainMenuResult } from '../hook/useMainMenu';
 
 const upcoming = [
-  { key: 'catalog', label: 'Catalog' },
   { key: 'pickup', label: 'Pickup Order' },
   { key: 'return', label: 'Return Order' },
   { key: 'issue', label: 'Report Issue' },
@@ -16,6 +15,7 @@ const upcoming = [
 
 export type MainMenuViewProps = UseMainMenuResult & {
   onManageWarehouse: () => void;
+  onCatalog: () => void;
   onPrintPoC: () => void;
   onImgUpload: () => void;
 };
@@ -28,6 +28,7 @@ export function MainMenuView({
   load,
   handleSignOut,
   onManageWarehouse,
+  onCatalog,
   onPrintPoC,
   onImgUpload,
 }: MainMenuViewProps) {
@@ -63,6 +64,10 @@ export function MainMenuView({
             </Button>
           </VStack>
         ) : null}
+
+        <Button onPress={onCatalog} disabled={blocked}>
+          <ButtonText>Catalog</ButtonText>
+        </Button>
 
         <Button onPress={onManageWarehouse} disabled={blocked}>
           <ButtonText>Manage Warehouse</ButtonText>

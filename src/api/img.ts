@@ -88,3 +88,8 @@ export async function fetchTestImage(
   });
   return data;
 }
+
+/** Owner-scoped delete of an uploaded/created file. */
+export async function deleteImageUpload(fileId: string): Promise<void> {
+  await api.delete(`/api/img/${fileId}`);
+}

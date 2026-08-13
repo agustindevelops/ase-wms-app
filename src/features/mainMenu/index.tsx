@@ -26,10 +26,18 @@ export function MainMenu() {
     });
   };
 
+  const onCatalog = () => {
+    if (!menu.me) return;
+    navigation.navigate('CatalogMenu', {
+      warehouseId: menu.me.warehouse.id,
+    });
+  };
+
   return (
     <MainMenuView
       {...menu}
       onManageWarehouse={onManageWarehouse}
+      onCatalog={onCatalog}
       onPrintPoC={() => navigation.navigate('PrintPoC')}
       onImgUpload={() => navigation.navigate('ImgUploadPoC')}
     />

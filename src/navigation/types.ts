@@ -27,6 +27,42 @@ export type MainStackParamList = {
     locationUnitId: string;
     locationName: string;
   };
+  CatalogMenu: {
+    warehouseId: string;
+  };
+  CatalogPhoto: {
+    warehouseId: string;
+  };
+  CatalogItemList: {
+    warehouseId: string;
+    mode: 'add' | 'move' | 'remove';
+  };
+  CatalogScanItem: {
+    warehouseId: string;
+    mode: 'move' | 'remove';
+  };
+  CatalogDetails: {
+    warehouseId: string;
+    photoFileIds: string[];
+  };
+  CatalogPrintQr: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+    qrCodeId?: string | null;
+  };
+  CatalogGlue: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+  };
+  CatalogScanLocation: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+    /** Create finishes on Main Menu; add/move return to the Catalog hub. */
+    doneTarget?: 'hub' | 'main';
+  };
   PrintPoC: undefined;
   ImgUploadPoC: undefined;
 };
