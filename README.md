@@ -13,8 +13,9 @@ src/
   components/ui/                # gluestack copy-paste components
   config/                       # env + printer constants
   firebase/                     # SDK init + signIn/signOut (no auth context)
-  api/                          # wmsFetch (Bearer via getIdToken) + /api/me
-  navigation/                   # onAuthStateChanged gate + MainTabs (Home | Print)
+  auth/                         # session store (isAuthenticated) fed by the SDK
+  api/                          # axios client + interceptors, /api/me
+  navigation/                   # session gate + MainTabs (Home | Print)
   screens/                      # thin tab screens that import features
   features/
     auth/                       # index + ui/ + hook/
@@ -26,7 +27,11 @@ Feature paradigm: **dumb `ui/`**, **handlers in `hook/`**, **`index` container**
 
 ## Auth & navigation
 
-- Firebase Auth (same project as `ase-wms-web`); session owned by the SDK
+- Firebase Auth (same project as `ase-wms-web`); tokens owned by the SDK
+- `auth/session.ts` holds `isAuthenticated` globally so navigation never
+  re-checks the backend. The SDK feeds it; the axios 401 handler clears it
+- `api/client.ts` attaches `Bearer <idToken>` per request. On 401 it retries once
+  with a forced refresh, then ends the session (→ Login)
 - Unauthenticated → Login (email/password)
 - Authenticated → bottom tabs: **Home** (`GET /api/me` smoke) | **Print** (D110 PoC)
 

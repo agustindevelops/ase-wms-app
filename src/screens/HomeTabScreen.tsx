@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { fetchMe, type MeUser } from '@/api/me';
-import { WmsApiError } from '@/api/wmsFetch';
+import { apiErrorMessage } from '@/api/client';
+import { fetchMe, type MeResponse } from '@/api/me';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
@@ -12,7 +12,7 @@ import { getFirebaseAuth } from '@/firebase/config';
 
 export function HomeTabScreen() {
   const email = getFirebaseAuth().currentUser?.email ?? null;
-  const [me, setMe] = useState<MeUser | null>(null);
+  const [me, setMe] = useState<MeResponse | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -21,17 +21,15 @@ export function HomeTabScreen() {
     setBusy(true);
     setStatus(null);
     try {
-      const { user } = await fetchMe();
-      setMe(user);
-      setStatus(`OK — Prisma user ${user.email} (${user.id})`);
+      const meResponse = await fetchMe();
+      setMe(meResponse);
+      setStatus(
+        `OK — Prisma user ${meResponse.user.email} · ${meResponse.warehouse.name}`,
+      );
     } catch (error) {
+      // A 401 already ended the session in the interceptor; just report it.
       setMe(null);
-      if (error instanceof WmsApiError && error.status === 401) {
-        setStatus(`401 — ${error.message}`);
-        await signOut();
-        return;
-      }
-      setStatus(error instanceof Error ? error.message : String(error));
+      setStatus(apiErrorMessage(error));
     } finally {
       setBusy(false);
     }
@@ -63,7 +61,7 @@ export function HomeTabScreen() {
 
         {me ? (
           <Text size="sm" className="text-brown-700">
-            Role {me.role} · uid {me.firebaseUid}
+            {me.warehouse.name} · {me.role.name} · uid {me.user.firebaseUid}
           </Text>
         ) : null}
 

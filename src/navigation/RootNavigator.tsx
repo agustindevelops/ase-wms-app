@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { User } from 'firebase/auth';
-import { onAuthStateChanged } from 'firebase/auth';
+import { startSessionSync, useSessionStatus } from '@/auth/session';
 import { Box } from '@/components/ui/box';
 import { Spinner } from '@/components/ui/spinner';
 import { Login } from '@/features/auth';
-import { getFirebaseAuth } from '@/firebase/config';
 import { MainTabs } from './MainTabs';
 
 export type RootStackParamList = {
@@ -17,17 +15,15 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /**
- * Route gate only — listens to the SDK; does not own tokens or session state.
+ * Route gate only: reads the session flag, never the backend. The flag is fed
+ * by the SDK and cleared by the axios 401 handler.
  */
 export function RootNavigator() {
-  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const status = useSessionStatus();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), setUser);
-    return unsubscribe;
-  }, []);
+  useEffect(() => startSessionSync(), []);
 
-  if (user === undefined) {
+  if (status === 'loading') {
     return (
       <Box className="flex-1 items-center justify-center bg-cream">
         <Spinner />
@@ -38,7 +34,7 @@ export function RootNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
+        {status === 'authenticated' ? (
           <Stack.Screen name="Main" component={MainTabs} />
         ) : (
           <Stack.Screen name="Login" component={Login} />
