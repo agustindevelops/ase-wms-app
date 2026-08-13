@@ -24,16 +24,18 @@ export function useLocationUnitForm({
   const isEdit = Boolean(locationUnitId);
 
   const submit = async (): Promise<boolean> => {
+    setBusy(true);
+    setError(null);
+
     const trimmedName = name.trim();
     const trimmedLabel = label.trim();
 
     if (!trimmedName) {
       setError('Name is required.');
+      setBusy(false);
       return false;
     }
 
-    setBusy(true);
-    setError(null);
     try {
       const body = {
         name: trimmedName,

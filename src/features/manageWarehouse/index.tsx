@@ -141,13 +141,9 @@ export function WarehouseLevel() {
       onAdd={onAdd}
       onEdit={onEdit}
       onEditCurrent={onEditCurrent}
-      onPrint={(unit) => {
-        void onPrint(unit);
-      }}
+      onPrint={(unit) => onPrint(unit)}
       onOpen={onOpen}
-      onConnectPrinter={() => {
-        void printer.connect();
-      }}
+      onConnectPrinter={() => printer.connect()}
     />
   );
 }

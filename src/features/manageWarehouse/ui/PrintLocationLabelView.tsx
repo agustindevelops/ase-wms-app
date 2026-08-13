@@ -1,13 +1,15 @@
 import { Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Box } from '@/components/ui/box';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { SafeAreaView } from '@/components/ui/safe-area-view';
 import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import { ActionLockProvider } from '../hook/useActionLock';
 import type { UsePrintLocationLabelResult } from '../hook/usePrintLocationLabel';
+import { OnceButton } from './OnceButton';
 
 export type PrintLocationLabelViewProps = UsePrintLocationLabelResult;
 
@@ -31,6 +33,7 @@ export function PrintLocationLabelView({
   const busy = loading || ensuring || sharing || printerBusy;
 
   return (
+    <ActionLockProvider>
     <SafeAreaView className="flex-1 bg-cream" edges={['bottom', 'left', 'right']}>
       <StatusBar style="dark" />
       <ScrollView className="flex-1">
@@ -54,14 +57,14 @@ export function PrintLocationLabelView({
               <Text size="sm" bold className="text-destructive">
                 {error}
               </Text>
-              <Button
+              <OnceButton
                 variant="secondary"
-                onPress={() => void load()}
+                onPress={() => load()}
                 disabled={busy}
               >
                 {loading ? <ButtonSpinner /> : null}
                 <ButtonText>Retry</ButtonText>
-              </Button>
+              </OnceButton>
             </VStack>
           ) : null}
 
@@ -99,40 +102,41 @@ export function PrintLocationLabelView({
           {busy && !loading ? <Spinner size="large" color="#7e9570" /> : null}
 
           {!qrPayload ? (
-            <Button onPress={() => void ensureQr()} disabled={busy || !unit}>
+            <OnceButton onPress={() => ensureQr()} disabled={busy || !unit}>
               {ensuring ? <ButtonSpinner /> : null}
               <ButtonText>Create QR code</ButtonText>
-            </Button>
+            </OnceButton>
           ) : null}
 
-          <Button
+          <OnceButton
             variant="secondary"
-            onPress={() => void connectPrinter()}
+            onPress={() => connectPrinter()}
             disabled={busy}
           >
             <ButtonText>
               {deviceName ? 'Reconnect printer' : 'Connect printer'}
             </ButtonText>
-          </Button>
+          </OnceButton>
 
-          <Button
-            onPress={() => void printLabel()}
+          <OnceButton
+            onPress={() => printLabel()}
             disabled={busy || !unit}
           >
             {printerBusy ? <ButtonSpinner /> : null}
             <ButtonText>Print QR label</ButtonText>
-          </Button>
+          </OnceButton>
 
-          <Button
+          <OnceButton
             variant="outline"
-            onPress={() => void shareLabel()}
+            onPress={() => shareLabel()}
             disabled={busy || !unit}
           >
             {sharing ? <ButtonSpinner /> : null}
             <ButtonText>Share label</ButtonText>
-          </Button>
+          </OnceButton>
         </VStack>
       </ScrollView>
     </SafeAreaView>
+    </ActionLockProvider>
   );
 }

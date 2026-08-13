@@ -5,15 +5,16 @@ import {
   type LocationUnit,
 } from '@/api/warehouse';
 import { Box } from '@/components/ui/box';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Pressable } from '@/components/ui/pressable';
 import { SafeAreaView } from '@/components/ui/safe-area-view';
 import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import { ActionLockProvider } from '../hook/useActionLock';
 import type { UseWarehouseLevelResult } from '../hook/useWarehouseLevel';
+import { OnceButton, OncePressable } from './OnceButton';
 import { QrPreview } from './QrPreview';
 import { showLocationActions } from './showLocationActions';
 
@@ -31,9 +32,9 @@ export type WarehouseLevelViewProps = UseWarehouseLevelResult & {
   onAdd: () => void;
   onEdit: (unit: LocationUnit) => void;
   onEditCurrent: () => void;
-  onPrint: (unit: LocationUnit) => void;
+  onPrint: (unit: LocationUnit) => void | Promise<void>;
   onOpen: (unit: LocationUnit) => void;
-  onConnectPrinter: () => void;
+  onConnectPrinter: () => void | Promise<void>;
 };
 
 export function WarehouseLevelView({
@@ -82,7 +83,8 @@ export function WarehouseLevelView({
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-cream" edges={['bottom', 'left', 'right']}>
+    <ActionLockProvider>
+      <SafeAreaView className="flex-1 bg-cream" edges={['bottom', 'left', 'right']}>
       <StatusBar style="dark" />
       <ScrollView
         className="flex-1"
@@ -119,7 +121,7 @@ export function WarehouseLevelView({
             </Text>
           ) : null}
 
-          <Button
+          <OnceButton
             size="sm"
             variant="outline"
             onPress={onEditCurrent}
@@ -128,7 +130,7 @@ export function WarehouseLevelView({
             <ButtonText>
               {isRoot ? 'Edit warehouse' : 'Edit'}
             </ButtonText>
-          </Button>
+          </OnceButton>
 
           <Text size="xs" className="text-brown-500">
             Tap a row to open the next level. Hold for delete
@@ -140,22 +142,22 @@ export function WarehouseLevelView({
               <Text size="sm" bold className="text-destructive">
                 {error}
               </Text>
-              <Button
+              <OnceButton
                 variant="secondary"
-                onPress={() => void load()}
+                onPress={() => load()}
                 disabled={busy}
               >
                 {loading ? <ButtonSpinner /> : null}
                 <ButtonText>Retry</ButtonText>
-              </Button>
+              </OnceButton>
             </VStack>
           ) : null}
 
-          <Button onPress={onAdd} disabled={busy}>
+          <OnceButton onPress={onAdd} disabled={busy}>
             <ButtonText>Add Level {level}</ButtonText>
-          </Button>
+          </OnceButton>
 
-          <Button
+          <OnceButton
             variant="secondary"
             onPress={onConnectPrinter}
             disabled={busy}
@@ -164,7 +166,7 @@ export function WarehouseLevelView({
             <ButtonText>
               {deviceName ? `Printer: ${deviceName}` : 'Connect printer'}
             </ButtonText>
-          </Button>
+          </OnceButton>
 
           {printerMessage ? (
             <Text size="sm" className="text-brown-500">
@@ -191,7 +193,7 @@ export function WarehouseLevelView({
                 key={unit.id}
                 className="items-center gap-2 rounded-xl border border-border bg-card px-2 py-2"
               >
-                <Pressable
+                <OncePressable
                   onPress={() => onOpen(unit)}
                   onLongPress={() => onLongPress(unit)}
                   delayLongPress={280}
@@ -222,8 +224,8 @@ export function WarehouseLevelView({
                       {unit.type.name}
                     </Text>
                   </HStack>
-                </Pressable>
-                <Button
+                </OncePressable>
+                <OnceButton
                   size="sm"
                   variant="ghost"
                   onPress={() => onEdit(unit)}
@@ -231,12 +233,13 @@ export function WarehouseLevelView({
                   className="shrink-0"
                 >
                   <ButtonText>Edit</ButtonText>
-                </Button>
+                </OnceButton>
               </HStack>
             );
           })}
         </VStack>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ActionLockProvider>
   );
 }

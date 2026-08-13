@@ -13,14 +13,16 @@ export function useWarehouseForm({ warehouseId, initialName = '' }: Args) {
   const [busy, setBusy] = useState(false);
 
   const submit = async (): Promise<string | null> => {
+    setBusy(true);
+    setError(null);
+
     const trimmedName = name.trim();
     if (!trimmedName) {
       setError('Name is required.');
+      setBusy(false);
       return null;
     }
 
-    setBusy(true);
-    setError(null);
     try {
       const warehouse = await updateWarehouse(warehouseId, {
         name: trimmedName,

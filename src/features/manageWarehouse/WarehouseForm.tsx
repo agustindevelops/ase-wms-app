@@ -22,14 +22,12 @@ export function WarehouseForm() {
     <WarehouseFormView
       {...fields}
       onCancel={() => navigation.goBack()}
-      onSubmit={() => {
-        void (async () => {
-          const savedName = await submit();
-          if (!savedName) {
-            return;
-          }
-          navigation.goBack();
-        })();
+      onSubmit={async () => {
+        const savedName = await submit();
+        if (!savedName) {
+          return;
+        }
+        navigation.goBack();
       }}
     />
   );

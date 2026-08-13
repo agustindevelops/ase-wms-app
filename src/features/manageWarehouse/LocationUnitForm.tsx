@@ -26,13 +26,11 @@ export function LocationUnitForm() {
       {...fields}
       level={params.level}
       onCancel={() => navigation.goBack()}
-      onSubmit={() => {
-        void (async () => {
-          const saved = await submit();
-          if (saved) {
-            navigation.goBack();
-          }
-        })();
+      onSubmit={async () => {
+        const saved = await submit();
+        if (saved) {
+          navigation.goBack();
+        }
       }}
     />
   );
