@@ -101,3 +101,29 @@ export function apiErrorMessage(error: unknown): string {
 
   return error instanceof Error ? error.message : String(error);
 }
+
+export function apiErrorCode(error: unknown): string | null {
+  if (!axios.isAxiosError(error)) {
+    return null;
+  }
+
+  const data: unknown = error.response?.data;
+  if (
+    data &&
+    typeof data === 'object' &&
+    'error' in data &&
+    typeof data.error === 'string'
+  ) {
+    return data.error;
+  }
+
+  return null;
+}
+
+/** ASE-21 POST /QR returns 409 QR_CODE_EXISTS when the unit already has one. */
+export function isApiConflict(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) {
+    return false;
+  }
+  return error.response?.status === 409 || apiErrorCode(error) === 'QR_CODE_EXISTS';
+}

@@ -14,6 +14,7 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { ActionLockProvider } from '../hook/useActionLock';
 import type { UseWarehouseLevelResult } from '../hook/useWarehouseLevel';
+import { CONNECT_PRINTER_CLASS } from './buttonStyles';
 import { OnceButton, OncePressable } from './OnceButton';
 import { QrPreview } from './QrPreview';
 import { showLocationActions } from './showLocationActions';
@@ -23,18 +24,17 @@ export type WarehouseLevelViewProps = UseWarehouseLevelResult & {
   parentName?: string;
   ancestorNames: string[];
   level: number;
-  printerConnected: boolean;
   printerBusy: boolean;
   printerMessage: string;
   deviceName: string | null;
-  printing: boolean;
   isRoot: boolean;
   onAdd: () => void;
   onEdit: (unit: LocationUnit) => void;
   onEditCurrent: () => void;
   onPrint: (unit: LocationUnit) => void | Promise<void>;
+  onPrintAll: () => void | Promise<void>;
   onOpen: (unit: LocationUnit) => void;
-  onConnectPrinter: () => void | Promise<void>;
+  onPrinterPress: () => void | Promise<void>;
 };
 
 export function WarehouseLevelView({
@@ -52,30 +52,28 @@ export function WarehouseLevelView({
   deletingId,
   load,
   confirmDelete,
-  printerConnected,
   printerBusy,
   printerMessage,
   deviceName,
-  printing,
   isRoot,
   onAdd,
   onEdit,
   onEditCurrent,
   onPrint,
+  onPrintAll,
   onOpen,
-  onConnectPrinter,
+  onPrinterPress,
 }: WarehouseLevelViewProps) {
   const title = currentUnit?.name ?? parentName ?? warehouse?.name ?? warehouseName;
   const currentQr = currentUnit ? locationQrPayload(currentUnit) : null;
   const canEditCurrent = isRoot || Boolean(currentUnit);
-  const busy = loading || deletingId !== null || printerBusy || printing;
+  const busy = loading || deletingId !== null || printerBusy;
   const breadcrumb = ancestorNames.length > 0 ? ancestorNames.join(' · ') : null;
 
   const onLongPress = (unit: LocationUnit) => {
     if (busy) return;
     showLocationActions({
       unit,
-      printerConnected,
       onEdit,
       onDelete: confirmDelete,
       onPrint,
@@ -133,8 +131,7 @@ export function WarehouseLevelView({
           </OnceButton>
 
           <Text size="xs" className="text-brown-500">
-            Tap a row to open the next level. Hold for delete
-            {printerConnected ? ' or print' : ''}.
+            Tap a row to open the next level. Hold for edit, print, or delete.
           </Text>
 
           {error ? (
@@ -158,15 +155,32 @@ export function WarehouseLevelView({
           </OnceButton>
 
           <OnceButton
-            variant="secondary"
-            onPress={onConnectPrinter}
+            variant={deviceName ? 'secondary' : 'default'}
+            onPress={onPrinterPress}
             disabled={busy}
+            className={deviceName ? undefined : CONNECT_PRINTER_CLASS}
           >
             {printerBusy ? <ButtonSpinner /> : null}
             <ButtonText>
-              {deviceName ? `Printer: ${deviceName}` : 'Connect printer'}
+              {!deviceName
+                ? 'Connect printer'
+                : currentUnit
+                  ? `Print to ${deviceName}`
+                  : `Connected to ${deviceName}`}
             </ButtonText>
           </OnceButton>
+
+          {deviceName && units.length > 0 ? (
+            <OnceButton
+              variant="outline"
+              onPress={onPrintAll}
+              disabled={busy}
+            >
+              <ButtonText>
+                {`Print all ${units.length} labels`}
+              </ButtonText>
+            </OnceButton>
+          ) : null}
 
           {printerMessage ? (
             <Text size="sm" className="text-brown-500">

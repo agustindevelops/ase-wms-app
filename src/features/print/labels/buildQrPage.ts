@@ -4,43 +4,44 @@ import {
   LABEL_ID,
   LABEL_WIDTH,
 } from '@/config/printer';
-import { addBitmapText } from './bitmapText';
+import { addFittedBitmapText } from './bitmapText';
 import { assertEncodedSize, type EncodedImage } from './assertEncodedSize';
 
-function digitsForLabel(text: string): string {
-  return text.replace(/\D/g, '').slice(0, 12);
-}
+/** Landscape canvas is LABEL_HEIGHT × LABEL_WIDTH (240×96). */
+const QR_SIZE = 96;
+const TEXT_GAP = 8;
 
 /**
- * Max-height QR at design left; digits just to its right when the payload or
- * label contains digits. Remaining space further right is free for a name.
+ * Max-height QR at design left, with the location's label name filling the
+ * space to its right. The QR carries the id; the text is for humans.
  */
 export function buildQrPage(
   payload: string = LABEL_ID,
-  options?: { digitText?: string },
+  options?: { text?: string },
 ): EncodedImage {
   const page = new PrintPage(LABEL_WIDTH, LABEL_HEIGHT, 'landscape');
-  const qrSize = 96;
-  const gap = 6;
+  const centerY = Math.round(LABEL_WIDTH / 2);
 
   page.addQR(payload, {
     x: 0,
-    y: 48,
-    width: qrSize,
-    height: qrSize,
+    y: centerY,
+    width: QR_SIZE,
+    height: QR_SIZE,
     align: 'left',
     vAlign: 'middle',
     ecl: 'M',
   });
 
-  const digitText = digitsForLabel(options?.digitText ?? payload);
-  if (digitText.length > 0) {
-    addBitmapText(page, digitText, {
-      x: qrSize + gap,
-      y: 48,
-      scale: 2.5,
+  const text = options?.text?.trim();
+  if (text) {
+    const textX = QR_SIZE + TEXT_GAP;
+    addFittedBitmapText(page, text, {
+      x: textX,
+      y: centerY,
+      maxWidth: LABEL_HEIGHT - textX - TEXT_GAP,
+      maxHeight: LABEL_WIDTH - TEXT_GAP,
       align: 'left',
-      vAlign: 'middle',
+      maxLines: 3,
     });
   }
 

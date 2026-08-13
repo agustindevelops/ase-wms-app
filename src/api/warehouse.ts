@@ -1,4 +1,4 @@
-import { api } from './client';
+import { api, isApiConflict } from './client';
 
 /**
  * ASE-21 / ERD data contract for warehouse hierarchy.
@@ -214,25 +214,59 @@ export function hasLocationQr(unit: LocationUnit): boolean {
   return locationQrPayload(unit) !== null;
 }
 
+export type EnsuredLocationQr = {
+  payload: string;
+  unit: LocationUnit;
+};
+
+function payloadFromQr(qr: QrCode | null | undefined): string | null {
+  const value = qr?.payload?.trim() || qr?.id?.trim();
+  return value || null;
+}
+
 /**
- * Print payload for a location unit. Uses the included QR when present;
- * POST /QR only if this unit has none yet.
+ * Location-label payload (QR_CODE_TYPE=1). Reuses the existing QR when present;
+ * otherwise POST /QR and wait for success. A 409 means another request already
+ * attached one — refetch and print that same code.
  */
 export async function ensureLocationQrPayload(
   warehouseId: string,
   unit: LocationUnit,
-): Promise<string> {
+): Promise<EnsuredLocationQr> {
   const existing = locationQrPayload(unit);
   if (existing) {
-    return existing;
+    return { payload: existing, unit };
   }
 
-  const created = await createLocationQr(warehouseId, {
-    locationUnitId: unit.id,
-  });
-  return created.qrCode.payload || created.qrCode.id;
+  try {
+    const created = await createLocationQr(warehouseId, {
+      locationUnitId: unit.id,
+    });
+    const payload = payloadFromQr(created.qrCode);
+    if (!payload) {
+      throw new Error('QR code was created without a printable payload.');
+    }
+    return { payload, unit: created.locationUnit };
+  } catch (cause) {
+    if (!isApiConflict(cause)) {
+      throw cause;
+    }
+
+    const detail = await fetchLocationUnit(warehouseId, unit.id);
+    const reused =
+      locationQrPayload(detail.locationUnit) ?? payloadFromQr(detail.qrCode);
+    if (!reused) {
+      throw cause;
+    }
+    return { payload: reused, unit: detail.locationUnit };
+  }
 }
 
 export function locationUnitSubtitle(unit: LocationUnit): string {
   return [unit.label, unit.type.name].filter(Boolean).join(' · ');
+}
+
+/** Human-readable text printed beside the QR; the QR itself carries the id. */
+export function locationLabelText(unit: LocationUnit): string {
+  return unit.label?.trim() || unit.name.trim();
 }

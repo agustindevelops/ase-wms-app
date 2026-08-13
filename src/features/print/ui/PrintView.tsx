@@ -75,7 +75,9 @@ export function PrintView({
 
         <Button
           variant="default"
-          onPress={printBarcode}
+          onPress={() => {
+            void printBarcode().catch(() => undefined);
+          }}
           disabled={busy || !deviceName}
         >
           <ButtonText>Print Code 128 + digits</ButtonText>
@@ -83,7 +85,9 @@ export function PrintView({
 
         <Button
           variant="default"
-          onPress={printQr}
+          onPress={() => {
+            void printQr().catch(() => undefined);
+          }}
           disabled={busy || !deviceName}
         >
           <ButtonText>Print max QR + digits</ButtonText>

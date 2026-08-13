@@ -2,49 +2,34 @@ import { useCallback, useState } from 'react';
 import { Share } from 'react-native';
 import { apiErrorMessage } from '@/api/client';
 import {
-  createLocationQr,
+  ensureLocationQrPayload,
   fetchLocationUnit,
+  locationLabelText,
   locationQrPayload,
+  type EnsuredLocationQr,
   type LocationUnit,
 } from '@/api/warehouse';
-import { usePrint } from '@/features/print/hook/usePrint';
+import { useAppToast } from '@/components/ui/toast';
+import { usePrinter } from '@/features/print/PrinterProvider';
 
 type Args = {
   warehouseId: string;
   locationUnitId: string;
 };
 
-async function resolveQr(
-  warehouseId: string,
-  locationUnitId: string,
+function unitWithQr(
   unit: LocationUnit,
-): Promise<{ unit: LocationUnit; payload: string }> {
-  const existing = locationQrPayload(unit);
-  if (existing) {
-    return { unit, payload: existing };
+  qrCode: LocationUnit['qrCode'],
+): LocationUnit {
+  if (unit.qrCode || !qrCode) {
+    return unit;
   }
-
-  try {
-    const created = await createLocationQr(warehouseId, { locationUnitId });
-    return {
-      unit: created.locationUnit,
-      payload: created.qrCode.payload,
-    };
-  } catch (cause) {
-    const detail = await fetchLocationUnit(warehouseId, locationUnitId);
-    const reused =
-      locationQrPayload(detail.locationUnit) ??
-      detail.qrCode?.payload?.trim() ??
-      null;
-    if (reused) {
-      return { unit: detail.locationUnit, payload: reused };
-    }
-    throw cause;
-  }
+  return { ...unit, qrCode };
 }
 
 export function usePrintLocationLabel({ warehouseId, locationUnitId }: Args) {
-  const print = usePrint();
+  const print = usePrinter();
+  const toast = useAppToast();
   const [unit, setUnit] = useState<LocationUnit | null>(null);
   const [qrPayload, setQrPayload] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,17 +42,9 @@ export function usePrintLocationLabel({ warehouseId, locationUnitId }: Args) {
     setError(null);
     try {
       const detail = await fetchLocationUnit(warehouseId, locationUnitId);
-      const unitWithQr =
-        detail.locationUnit.qrCode || !detail.qrCode
-          ? detail.locationUnit
-          : { ...detail.locationUnit, qrCode: detail.qrCode };
-      const resolved = await resolveQr(
-        warehouseId,
-        locationUnitId,
-        unitWithQr,
-      );
-      setUnit(resolved.unit);
-      setQrPayload(resolved.payload);
+      const nextUnit = unitWithQr(detail.locationUnit, detail.qrCode);
+      setUnit(nextUnit);
+      setQrPayload(locationQrPayload(nextUnit));
     } catch (cause) {
       setUnit(null);
       setQrPayload(null);
@@ -77,47 +54,69 @@ export function usePrintLocationLabel({ warehouseId, locationUnitId }: Args) {
     }
   }, [locationUnitId, warehouseId]);
 
-  const ensureQr = useCallback(async () => {
+  const resolveQr = useCallback(async (): Promise<EnsuredLocationQr | null> => {
     setEnsuring(true);
-    setError(null);
     try {
-      const current =
-        unit ??
-        (await fetchLocationUnit(warehouseId, locationUnitId)).locationUnit;
-      const resolved = await resolveQr(warehouseId, locationUnitId, current);
+      let current = unit;
+      if (!current) {
+        const detail = await fetchLocationUnit(warehouseId, locationUnitId);
+        current = unitWithQr(detail.locationUnit, detail.qrCode);
+      }
+      const resolved = await ensureLocationQrPayload(warehouseId, current);
       setUnit(resolved.unit);
       setQrPayload(resolved.payload);
-      return resolved.payload;
+      return resolved;
     } catch (cause) {
-      setError(apiErrorMessage(cause));
+      toast.error(apiErrorMessage(cause));
       return null;
     } finally {
       setEnsuring(false);
     }
-  }, [locationUnitId, unit, warehouseId]);
+  }, [locationUnitId, toast, unit, warehouseId]);
+
+  const ensureQr = async () => {
+    const resolved = await resolveQr();
+    return resolved?.payload ?? null;
+  };
 
   const shareLabel = async () => {
-    const payload = qrPayload ?? (await ensureQr());
-    if (!payload || !unit) return;
+    const resolved = qrPayload && unit
+      ? { payload: qrPayload, unit }
+      : await resolveQr();
+    if (!resolved) return;
 
     setSharing(true);
     try {
-      const subtitle = unit.label ? ` (${unit.label})` : '';
+      const subtitle = resolved.unit.label ? ` (${resolved.unit.label})` : '';
       await Share.share({
-        title: unit.name,
-        message: `${unit.name}${subtitle}\n${payload}`,
+        title: resolved.unit.name,
+        message: `${resolved.unit.name}${subtitle}\n${resolved.payload}`,
       });
     } catch (cause) {
-      setError(apiErrorMessage(cause));
+      toast.error(apiErrorMessage(cause));
     } finally {
       setSharing(false);
     }
   };
 
   const printLabel = async () => {
-    const payload = qrPayload ?? (await ensureQr());
-    if (!payload) return;
-    await print.printQrPayload(payload, unit?.label ?? undefined);
+    if (!print.deviceName) {
+      toast.error('Connect a D110 printer first.');
+      return;
+    }
+
+    const resolved = await resolveQr();
+    if (!resolved) return;
+
+    try {
+      await print.printQrPayload(
+        resolved.payload,
+        locationLabelText(resolved.unit),
+      );
+      toast.success('Printed location label.');
+    } catch {
+      // usePrint already toasted the printer error
+    }
   };
 
   return {

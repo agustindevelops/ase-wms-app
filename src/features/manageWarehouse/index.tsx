@@ -1,16 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apiErrorMessage } from '@/api/client';
 import {
   ensureLocationQrPayload,
-  locationQrPayload,
+  locationLabelText,
+  type EnsuredLocationQr,
   type LocationUnit,
 } from '@/api/warehouse';
+import { useAppToast } from '@/components/ui/toast';
 import { usePrinter } from '@/features/print/PrinterProvider';
 import type { MainStackParamList } from '@/navigation/types';
 import { useWarehouseLevel } from './hook/useWarehouseLevel';
+import { confirmPrintAll } from './ui/confirmPrintAll';
 import { WarehouseLevelView } from './ui/WarehouseLevelView';
 
 type Route = NativeStackScreenProps<MainStackParamList, 'WarehouseLevel'>['route'];
@@ -20,11 +23,11 @@ export function WarehouseLevel() {
   const { params } = useRoute<Route>();
   const navigation = useNavigation<Navigation>();
   const printer = usePrinter();
+  const toast = useAppToast();
   const level = useWarehouseLevel({
     warehouseId: params.warehouseId,
     parentLocationUnitId: params.parentLocationUnitId,
   });
-  const [printing, setPrinting] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,24 +108,114 @@ export function WarehouseLevel() {
     });
   };
 
-  const onPrint = async (unit: LocationUnit) => {
-    if (!printer.deviceName) return;
-    setPrinting(true);
+  const printUnitQr = async (unit: LocationUnit) => {
+    let resolved;
     try {
-      const hadQr = Boolean(locationQrPayload(unit));
-      const payload = await ensureLocationQrPayload(
-        params.warehouseId,
-        unit,
-      );
-      await printer.printQrPayload(payload, unit.label ?? undefined);
-      if (!hadQr) {
-        await level.load('refresh');
-      }
+      resolved = await ensureLocationQrPayload(params.warehouseId, unit);
     } catch (cause) {
-      level.setError(apiErrorMessage(cause));
-    } finally {
-      setPrinting(false);
+      toast.error(apiErrorMessage(cause));
+      return;
     }
+
+    level.applyLocationUnit(resolved.unit);
+
+    try {
+      await printer.printQrPayload(
+        resolved.payload,
+        locationLabelText(resolved.unit),
+      );
+      toast.success('Printed location label.');
+    } catch {
+      // usePrint already toasted the printer error
+    }
+  };
+
+  /**
+   * Batch print: QR creation runs in parallel (independent POSTs), printing
+   * stays sequential because the printer handles one page at a time.
+   */
+  const printAllChildren = async () => {
+    if (!printer.deviceName) {
+      await printer.connect();
+      return;
+    }
+
+    const targets = level.units;
+    if (targets.length === 0) {
+      toast.error('No locations at this level to print.');
+      return;
+    }
+
+    if (!(await confirmPrintAll(targets.length, printer.deviceName))) {
+      return;
+    }
+
+    const settled = await Promise.allSettled(
+      targets.map((unit) => ensureLocationQrPayload(params.warehouseId, unit)),
+    );
+
+    const ready: EnsuredLocationQr[] = [];
+    let firstFailure: unknown;
+
+    settled.forEach((outcome) => {
+      if (outcome.status === 'fulfilled') {
+        ready.push(outcome.value);
+        level.applyLocationUnit(outcome.value.unit);
+        return;
+      }
+      firstFailure ??= outcome.reason;
+    });
+
+    if (firstFailure !== undefined) {
+      toast.error(
+        `${settled.length - ready.length} QR code(s) failed: ${apiErrorMessage(firstFailure)}`,
+      );
+    }
+
+    let printed = 0;
+    for (const item of ready) {
+      try {
+        await printer.printQrPayload(item.payload, locationLabelText(item.unit));
+        printed += 1;
+      } catch {
+        // usePrint toasted the printer error; stop instead of failing every page
+        break;
+      }
+    }
+
+    if (printed === targets.length) {
+      toast.success(`Printed ${printed} location labels.`);
+    } else if (printed > 0) {
+      toast.error(`Printed ${printed} of ${targets.length} labels.`);
+    }
+  };
+
+  const onPrinterPress = async () => {
+    if (!printer.deviceName) {
+      await printer.connect();
+      return;
+    }
+
+    const unit = level.currentUnit;
+    if (!unit) {
+      await printer.connect();
+      return;
+    }
+
+    await printUnitQr(unit);
+  };
+
+  const onPrint = (unit: LocationUnit) => {
+    if (printer.deviceName) {
+      void printUnitQr(unit);
+      return;
+    }
+
+    navigation.navigate('PrintLocationLabel', {
+      warehouseId: params.warehouseId,
+      locationUnitId: unit.id,
+      locationName: unit.name,
+    });
   };
 
   return (
@@ -133,17 +226,16 @@ export function WarehouseLevel() {
       ancestorNames={params.ancestorNames ?? []}
       level={params.level}
       isRoot={!params.parentLocationUnitId}
-      printerConnected={Boolean(printer.deviceName)}
       printerBusy={printer.busy}
       printerMessage={printer.message}
       deviceName={printer.deviceName}
-      printing={printing}
       onAdd={onAdd}
       onEdit={onEdit}
       onEditCurrent={onEditCurrent}
-      onPrint={(unit) => onPrint(unit)}
+      onPrint={onPrint}
+      onPrintAll={printAllChildren}
       onOpen={onOpen}
-      onConnectPrinter={() => printer.connect()}
+      onPrinterPress={onPrinterPress}
     />
   );
 }

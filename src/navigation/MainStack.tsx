@@ -54,7 +54,11 @@ export function MainStack() {
       <Stack.Screen
         name="PrintLocationLabel"
         component={PrintLocationLabel}
-        options={{ title: 'Print Label' }}
+        options={({ route }) => ({
+          title: route.params.locationName
+            ? `Print ${route.params.locationName}`
+            : 'Print Label',
+        })}
       />
       <Stack.Screen
         name="PrintPoC"

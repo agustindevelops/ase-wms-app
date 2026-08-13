@@ -3,6 +3,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaListener } from 'react-native-safe-area-context';
 import { Uniwind } from 'uniwind';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import { ScreenErrorBoundary } from '@/components/ui/ScreenErrorBoundary';
 import { RootNavigator } from '@/navigation/RootNavigator';
 
 export default function App() {
@@ -15,7 +16,9 @@ export default function App() {
           }}
         >
           <GluestackUIProvider mode="light">
-            <RootNavigator />
+            <ScreenErrorBoundary>
+              <RootNavigator />
+            </ScreenErrorBoundary>
           </GluestackUIProvider>
         </SafeAreaListener>
       </SafeAreaProvider>

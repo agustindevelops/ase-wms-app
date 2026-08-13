@@ -3,13 +3,16 @@ import { StatusBar } from 'expo-status-bar';
 import { Box } from '@/components/ui/box';
 import { ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { HStack } from '@/components/ui/hstack';
 import { SafeAreaView } from '@/components/ui/safe-area-view';
 import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { ActionLockProvider } from '../hook/useActionLock';
 import type { UsePrintLocationLabelResult } from '../hook/usePrintLocationLabel';
+import { CONNECT_PRINTER_CLASS } from './buttonStyles';
 import { OnceButton } from './OnceButton';
+import { QrPreview } from './QrPreview';
 
 export type PrintLocationLabelViewProps = UsePrintLocationLabelResult;
 
@@ -39,11 +42,21 @@ export function PrintLocationLabelView({
       <ScrollView className="flex-1">
         <VStack className="px-6 pt-4 pb-8 gap-3.5">
           {unit ? (
-            <Text size="sm" className="text-brown-500">
-              {[unit.name, unit.label, unit.type.name]
-                .filter(Boolean)
-                .join(' · ')}
-            </Text>
+            <HStack className="items-start gap-3">
+              <VStack className="flex-1 min-w-0 gap-1">
+                <Text size="sm" className="text-brown-500">
+                  {[unit.name, unit.label, unit.type.name]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Text>
+                <Text size="sm" className="text-brown-500">
+                  {qrPayload
+                    ? 'This location already has a QR. Print uses the same code.'
+                    : 'Print creates a location QR (type 1), then sends it to the D110.'}
+                </Text>
+              </VStack>
+              {qrPayload ? <QrPreview value={qrPayload} size={72} /> : null}
+            </HStack>
           ) : null}
 
           {loading ? (
@@ -86,7 +99,7 @@ export function PrintLocationLabelView({
             </Text>
             <Text size="sm" className="text-muted-foreground leading-5">
               {deviceName
-                ? `Printer: ${deviceName}`
+                ? `Print to ${deviceName}`
                 : 'Connect a D110 to print, or share the payload.'}
             </Text>
             {printerSummary ? (
@@ -109,7 +122,8 @@ export function PrintLocationLabelView({
           ) : null}
 
           <OnceButton
-            variant="secondary"
+            variant={deviceName ? 'outline' : 'default'}
+            className={deviceName ? undefined : CONNECT_PRINTER_CLASS}
             onPress={() => connectPrinter()}
             disabled={busy}
           >
@@ -118,13 +132,16 @@ export function PrintLocationLabelView({
             </ButtonText>
           </OnceButton>
 
-          <OnceButton
-            onPress={() => printLabel()}
-            disabled={busy || !unit}
-          >
-            {printerBusy ? <ButtonSpinner /> : null}
-            <ButtonText>Print QR label</ButtonText>
-          </OnceButton>
+          {deviceName ? (
+            <OnceButton
+              variant="secondary"
+              onPress={() => printLabel()}
+              disabled={busy || !unit}
+            >
+              {printerBusy ? <ButtonSpinner /> : null}
+              <ButtonText>{`Print to ${deviceName}`}</ButtonText>
+            </OnceButton>
+          ) : null}
 
           <OnceButton
             variant="outline"

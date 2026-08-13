@@ -3,6 +3,7 @@ import {
   LabelType,
   NiimbotBluetoothClient,
 } from 'react-native-niimblue-lib';
+import { useAppToast } from '@/components/ui/toast';
 import {
   DEVICE_SCAN_TIMEOUT_MS,
   LABEL_ID,
@@ -14,25 +15,20 @@ import { buildBarcodePage } from '../labels/buildBarcodePage';
 import { buildQrPage } from '../labels/buildQrPage';
 import { requestBluetoothPermissions } from './permissions';
 
+function toMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export type PrintStatus = 'idle' | 'working' | 'connected' | 'error';
 export type PrintMode = 'barcode' | 'qr';
-
-/** Optional MTU helpers (present on patched builds; not in upstream types). */
-type PrinterWithMtu = NiimbotBluetoothClient & {
-  setRequestedMtu?: (mtu: number) => void;
-  getRequestedMtu?: () => number;
-  getDeviceMtu?: () => number | null | undefined;
-};
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function usePrint() {
-  const printer = useMemo(
-    () => new NiimbotBluetoothClient() as PrinterWithMtu,
-    [],
-  );
+  const toast = useAppToast();
+  const printer = useMemo(() => new NiimbotBluetoothClient(), []);
   const [scannerKind, setScannerKind] = useState<ScannerKind | null>(null);
   const [status, setStatus] = useState<PrintStatus>('idle');
   const [message, setMessage] = useState('Turn on the D110, then connect.');
@@ -61,7 +57,9 @@ export function usePrint() {
       const device = devices[0];
       setMessage(`Connecting to ${device.name ?? device.id}…`);
       printer.setDebug(true);
-      printer.setRequestedMtu?.(REQUESTED_MTU);
+      // Requires patches/react-native-niimblue-lib+1.2.1.patch; without the
+      // larger MTU the printer accepts commands but never receives bitmap rows.
+      printer.setRequestedMtu(REQUESTED_MTU);
       const connection = await printer.connect(device);
 
       printer.stopHeartbeat();
@@ -69,7 +67,7 @@ export function usePrint() {
       const info = printer.getPrinterInfo();
       const metadata = printer.getModelMetadata();
       const printTaskType = printer.getPrintTaskType();
-      const deviceMtu = printer.getDeviceMtu?.();
+      const deviceMtu = printer.getDeviceMtu();
 
       console.log(
         'NIIMBOT CONNECTION DIAGNOSTIC',
@@ -80,7 +78,7 @@ export function usePrint() {
             metadata,
             printTaskType,
             bleConnected: printer.isConnected(),
-            requestedMtu: printer.getRequestedMtu?.(),
+            requestedMtu: printer.getRequestedMtu(),
             deviceMtu,
           },
           null,
@@ -102,24 +100,25 @@ export function usePrint() {
       setStatus('connected');
       setMessage('Connected.');
     } catch (error) {
+      const message = toMessage(error);
       setStatus('error');
       setDeviceName(null);
       setPrinterSummary(null);
-      setMessage(error instanceof Error ? error.message : String(error));
-      console.error('Connect failed', error);
+      setMessage(message);
+      toast.error(message);
     }
   };
 
   const print = async (
     mode: PrintMode,
     qrPayload: string = LABEL_ID,
-    digitText?: string,
+    labelText?: string,
   ) => {
     setStatus('working');
     setMessage(
       mode === 'barcode'
         ? `Printing Code 128 + digits: ${LABEL_ID}…`
-        : `Printing max QR: ${qrPayload}…`,
+        : `Printing label: ${labelText?.trim() || qrPayload}…`,
     );
 
     let task: ReturnType<typeof printer.createPrintTask> | undefined;
@@ -136,7 +135,7 @@ export function usePrint() {
       const encoded =
         mode === 'barcode'
           ? buildBarcodePage()
-          : buildQrPage(qrPayload, { digitText });
+          : buildQrPage(qrPayload, { text: labelText });
 
       const totalBlackPixels = encoded.rowsData.reduce(
         (total, row) => total + row.blackPixelsCount * row.repeat,
@@ -180,12 +179,14 @@ export function usePrint() {
       setMessage(
         mode === 'barcode'
           ? `Code 128 + digits printed: ${LABEL_ID}`
-          : `Max QR printed: ${qrPayload}`,
+          : `Printed: ${labelText?.trim() || qrPayload}`,
       );
     } catch (error) {
+      const message = toMessage(error);
       setStatus('error');
-      setMessage(error instanceof Error ? error.message : String(error));
-      console.error('Print failed', error);
+      setMessage(message);
+      toast.error(message);
+      throw error;
     } finally {
       try {
         await task?.printEnd?.();
@@ -206,9 +207,9 @@ export function usePrint() {
     busy,
     connect,
     printBarcode: () => print('barcode'),
-    printQr: () => print('qr'),
-    printQrPayload: (payload: string, digitText?: string) =>
-      print('qr', payload, digitText),
+    printQr: () => print('qr', LABEL_ID, LABEL_ID),
+    printQrPayload: (payload: string, labelText?: string) =>
+      print('qr', payload, labelText),
     openBarcodeScanner: () => setScannerKind('barcode'),
     openQrScanner: () => setScannerKind('qr'),
     closeScanner: () => setScannerKind(null),

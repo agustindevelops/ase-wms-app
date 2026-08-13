@@ -95,6 +95,15 @@ export function useWarehouseLevel({ warehouseId, parentLocationUnitId }: Args) {
     );
   };
 
+  const applyLocationUnit = useCallback((next: LocationUnit) => {
+    setCurrentUnit((current) =>
+      current?.id === next.id ? next : current,
+    );
+    setUnits((list) =>
+      list.map((unit) => (unit.id === next.id ? next : unit)),
+    );
+  }, []);
+
   return {
     units,
     currentUnit,
@@ -106,6 +115,7 @@ export function useWarehouseLevel({ warehouseId, parentLocationUnitId }: Args) {
     deletingId,
     load,
     confirmDelete,
+    applyLocationUnit,
     setError,
   };
 }

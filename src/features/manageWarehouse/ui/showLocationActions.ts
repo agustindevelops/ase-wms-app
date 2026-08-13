@@ -3,16 +3,14 @@ import { hasLocationQr, type LocationUnit } from '@/api/warehouse';
 
 type Args = {
   unit: LocationUnit;
-  printerConnected: boolean;
   onEdit: (unit: LocationUnit) => void;
   onDelete: (unit: LocationUnit) => void;
   onPrint: (unit: LocationUnit) => void;
 };
 
-/** Long-press menu: edit / delete, plus print only after the D110 is connected. */
+/** Long-press menu: edit / print label / delete. */
 export function showLocationActions({
   unit,
-  printerConnected,
   onEdit,
   onDelete,
   onPrint,
@@ -23,36 +21,27 @@ export function showLocationActions({
     : unit.type.name;
 
   if (Platform.OS === 'ios') {
-    const options = printerConnected
-      ? ['Edit', 'Print label', 'Delete', 'Cancel']
-      : ['Edit', 'Delete', 'Cancel'];
-    const cancelButtonIndex = options.length - 1;
-    const destructiveButtonIndex = printerConnected ? 2 : 1;
-
     ActionSheetIOS.showActionSheetWithOptions(
-      { title, message, options, cancelButtonIndex, destructiveButtonIndex },
+      {
+        title,
+        message,
+        options: ['Edit', 'Print label', 'Delete', 'Cancel'],
+        cancelButtonIndex: 3,
+        destructiveButtonIndex: 2,
+      },
       (index) => {
-        if (printerConnected) {
-          if (index === 0) onEdit(unit);
-          if (index === 1) onPrint(unit);
-          if (index === 2) onDelete(unit);
-          return;
-        }
         if (index === 0) onEdit(unit);
-        if (index === 1) onDelete(unit);
+        if (index === 1) onPrint(unit);
+        if (index === 2) onDelete(unit);
       },
     );
     return;
   }
 
-  const buttons = [
+  Alert.alert(title, message, [
     { text: 'Edit', onPress: () => onEdit(unit) },
-    ...(printerConnected
-      ? [{ text: 'Print label', onPress: () => onPrint(unit) }]
-      : []),
-    { text: 'Delete', style: 'destructive' as const, onPress: () => onDelete(unit) },
-    { text: 'Cancel', style: 'cancel' as const },
-  ];
-
-  Alert.alert(title, message, buttons);
+    { text: 'Print label', onPress: () => onPrint(unit) },
+    { text: 'Delete', style: 'destructive', onPress: () => onDelete(unit) },
+    { text: 'Cancel', style: 'cancel' },
+  ]);
 }
