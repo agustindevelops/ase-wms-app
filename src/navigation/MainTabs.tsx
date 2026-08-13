@@ -1,10 +1,12 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeTabScreen } from '@/screens/HomeTabScreen';
+import { ImgUploadTabScreen } from '@/screens/ImgUploadTabScreen';
 import { PrintTabScreen } from '@/screens/PrintTabScreen';
 
 export type MainTabParamList = {
   Home: undefined;
   Print: undefined;
+  ImgUpload: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -39,6 +41,11 @@ export function MainTabs() {
         name="Print"
         component={PrintTabScreen}
         options={{ title: 'Print', tabBarLabel: 'Print' }}
+      />
+      <Tab.Screen
+        name="ImgUpload"
+        component={ImgUploadTabScreen}
+        options={{ title: 'Img', tabBarLabel: 'Img' }}
       />
     </Tab.Navigator>
   );
