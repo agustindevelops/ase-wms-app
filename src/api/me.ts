@@ -1,4 +1,5 @@
 import { api } from './client';
+import { getFirebaseAuth } from '@/firebase/config';
 
 export type MeUser = {
   id: string;
@@ -8,7 +9,7 @@ export type MeUser = {
   updatedAt: string;
 };
 
-/** Authorization is warehouse-scoped: the role comes from the membership. */
+/** Membership-backed session. warehouse.id is the ASE-21 path param. */
 export type MeResponse = {
   user: MeUser;
   warehouse: {
@@ -19,10 +20,21 @@ export type MeResponse = {
     code: string;
     name: string;
   };
+  tokenRefreshRequired?: boolean;
 };
 
-/** Prisma-backed protected GET — ASE-10 smoke. */
+/**
+ * GET /api/me — user + the warehouse from WAREHOUSE_MEMBERSHIP.
+ * Manage Warehouse must call /api/warehouse/{warehouse.id}/… with this id
+ * (ASE-21). Do not hardcode a default warehouse.
+ */
 export async function fetchMe(): Promise<MeResponse> {
   const { data } = await api.get<MeResponse>('/api/me');
+  if (data.tokenRefreshRequired) {
+    const user = getFirebaseAuth().currentUser;
+    if (user) {
+      await user.getIdToken(true);
+    }
+  }
   return data;
 }

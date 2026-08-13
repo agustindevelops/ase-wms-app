@@ -5,7 +5,7 @@ import { startSessionSync, useSessionStatus } from '@/auth/session';
 import { Box } from '@/components/ui/box';
 import { Spinner } from '@/components/ui/spinner';
 import { Login } from '@/features/auth';
-import { MainTabs } from './MainTabs';
+import { MainStack } from './MainStack';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -35,7 +35,7 @@ export function RootNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {status === 'authenticated' ? (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Main" component={MainStack} />
         ) : (
           <Stack.Screen name="Login" component={Login} />
         )}

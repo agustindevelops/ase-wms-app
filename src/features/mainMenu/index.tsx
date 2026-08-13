@@ -1,0 +1,39 @@
+import { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '@/navigation/types';
+import { useMainMenu } from './hook/useMainMenu';
+import { MainMenuView } from './ui/MainMenuView';
+
+type Navigation = NativeStackNavigationProp<MainStackParamList, 'MainMenu'>;
+
+export function MainMenu() {
+  const navigation = useNavigation<Navigation>();
+  const menu = useMainMenu();
+
+  useEffect(() => {
+    void menu.load();
+  }, [menu.load]);
+
+  const onManageWarehouse = () => {
+    if (!menu.me) return;
+    // ASE-21: every warehouse route is scoped to the membership warehouse.
+    navigation.navigate('WarehouseLevel', {
+      warehouseId: menu.me.warehouse.id,
+      warehouseName: menu.me.warehouse.name,
+      level: 1,
+      ancestorNames: [],
+    });
+  };
+
+  return (
+    <MainMenuView
+      {...menu}
+      onManageWarehouse={onManageWarehouse}
+      onPrintPoC={() => navigation.navigate('PrintPoC')}
+      onImgUpload={() => navigation.navigate('ImgUploadPoC')}
+    />
+  );
+}
+
+export default MainMenu;

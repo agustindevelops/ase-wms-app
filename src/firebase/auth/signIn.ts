@@ -1,25 +1,12 @@
-import { FirebaseError } from 'firebase/app';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithCustomToken } from 'firebase/auth';
+import { aseWmsApiUrl } from '@/config/env';
 import { getFirebaseAuth } from '../config';
 
-function messageForAuthError(error: unknown): string {
-  if (error instanceof FirebaseError) {
-    switch (error.code) {
-      case 'auth/invalid-email':
-        return 'Enter a valid email address.';
-      case 'auth/invalid-credential':
-      case 'auth/wrong-password':
-      case 'auth/user-not-found':
-        return 'Invalid email or password.';
-      case 'auth/too-many-requests':
-        return 'Too many attempts. Try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Check your connection.';
-      default:
-        return error.message;
-    }
+function messageForLoginError(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
   }
-  return error instanceof Error ? error.message : String(error);
+  return String(error);
 }
 
 export async function signIn(email: string, password: string): Promise<void> {
@@ -28,9 +15,32 @@ export async function signIn(email: string, password: string): Promise<void> {
     throw new Error('Email and password are required.');
   }
 
+  if (!aseWmsApiUrl) {
+    throw new Error(
+      'EXPO_PUBLIC_ASE_WMS_API_URL is not set. Add it to .env (no trailing slash).',
+    );
+  }
+
   try {
-    await signInWithEmailAndPassword(getFirebaseAuth(), trimmed, password);
+    const response = await fetch(`${aseWmsApiUrl.replace(/\/$/, '')}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: trimmed, password }),
+    });
+    const payload = (await response.json()) as {
+      customToken?: string;
+      message?: string;
+    };
+
+    if (!response.ok || !payload.customToken) {
+      throw new Error(payload.message ?? 'Invalid email or password.');
+    }
+
+    await signInWithCustomToken(getFirebaseAuth(), payload.customToken);
   } catch (error) {
-    throw new Error(messageForAuthError(error));
+    if (error instanceof Error && error.message === 'Network request failed') {
+      throw new Error('Network error. Check your connection.');
+    }
+    throw new Error(messageForLoginError(error));
   }
 }

@@ -100,7 +100,7 @@ export function usePrint() {
       );
       setDeviceName(device.name ?? device.id);
       setStatus('connected');
-      setMessage('Connected. Choose Code 128 or QR.');
+      setMessage('Connected.');
     } catch (error) {
       setStatus('error');
       setDeviceName(null);
@@ -110,12 +110,16 @@ export function usePrint() {
     }
   };
 
-  const print = async (mode: PrintMode) => {
+  const print = async (
+    mode: PrintMode,
+    qrPayload: string = LABEL_ID,
+    digitText?: string,
+  ) => {
     setStatus('working');
     setMessage(
       mode === 'barcode'
         ? `Printing Code 128 + digits: ${LABEL_ID}…`
-        : `Printing max QR + digits: ${LABEL_ID}…`,
+        : `Printing max QR: ${qrPayload}…`,
     );
 
     let task: ReturnType<typeof printer.createPrintTask> | undefined;
@@ -130,7 +134,9 @@ export function usePrint() {
       await sleep(300);
 
       const encoded =
-        mode === 'barcode' ? buildBarcodePage() : buildQrPage();
+        mode === 'barcode'
+          ? buildBarcodePage()
+          : buildQrPage(qrPayload, { digitText });
 
       const totalBlackPixels = encoded.rowsData.reduce(
         (total, row) => total + row.blackPixelsCount * row.repeat,
@@ -174,7 +180,7 @@ export function usePrint() {
       setMessage(
         mode === 'barcode'
           ? `Code 128 + digits printed: ${LABEL_ID}`
-          : `Max QR + digits printed: ${LABEL_ID}`,
+          : `Max QR printed: ${qrPayload}`,
       );
     } catch (error) {
       setStatus('error');
@@ -201,6 +207,8 @@ export function usePrint() {
     connect,
     printBarcode: () => print('barcode'),
     printQr: () => print('qr'),
+    printQrPayload: (payload: string, digitText?: string) =>
+      print('qr', payload, digitText),
     openBarcodeScanner: () => setScannerKind('barcode'),
     openQrScanner: () => setScannerKind('qr'),
     closeScanner: () => setScannerKind(null),

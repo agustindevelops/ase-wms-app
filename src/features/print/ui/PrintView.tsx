@@ -13,7 +13,7 @@ import type { UsePrintResult } from '../hook/usePrint';
 
 export type PrintViewProps = Omit<
   UsePrintResult,
-  'scannerKind' | 'closeScanner' | 'status'
+  'scannerKind' | 'closeScanner' | 'status' | 'printQrPayload'
 >;
 
 export function PrintView({
