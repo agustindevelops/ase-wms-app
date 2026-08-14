@@ -13,6 +13,14 @@ import { LocationUnitForm } from '@/features/manageWarehouse/LocationUnitForm';
 import { PrintLocationLabel } from '@/features/manageWarehouse/PrintLocationLabel';
 import { WarehouseForm } from '@/features/manageWarehouse/WarehouseForm';
 import { WarehouseLevel } from '@/features/manageWarehouse';
+import {
+  OrderDetail,
+  OrderIssue,
+  OrderList,
+  OrderQty,
+  OrderScanItem,
+  OrderScanLocation,
+} from '@/features/order';
 import { MainMenu } from '@/features/mainMenu';
 import { PrinterProvider } from '@/features/print/PrinterProvider';
 import { ImgUploadTabScreen } from '@/screens/ImgUploadTabScreen';
@@ -116,6 +124,40 @@ export function MainStack() {
         name="CatalogScanLocation"
         component={CatalogScanLocation}
         options={{ title: 'Catalog · Location', headerShown: false }}
+      />
+      <Stack.Screen
+        name="OrderList"
+        component={OrderList}
+        options={({ route }) => ({
+          title: route.params.mode === 'pickup' ? 'Pickup Order' : 'Return Order',
+        })}
+      />
+      <Stack.Screen
+        name="OrderDetail"
+        component={OrderDetail}
+        options={({ route }) => ({
+          title: route.params.mode === 'pickup' ? 'Pickup' : 'Return',
+        })}
+      />
+      <Stack.Screen
+        name="OrderScanItem"
+        component={OrderScanItem}
+        options={{ title: 'Scan item', headerShown: false }}
+      />
+      <Stack.Screen
+        name="OrderQty"
+        component={OrderQty}
+        options={{ title: 'Quantity' }}
+      />
+      <Stack.Screen
+        name="OrderScanLocation"
+        component={OrderScanLocation}
+        options={{ title: 'Scan location', headerShown: false }}
+      />
+      <Stack.Screen
+        name="OrderIssue"
+        component={OrderIssue}
+        options={{ title: 'Report issue' }}
       />
       <Stack.Screen
         name="PrintPoC"

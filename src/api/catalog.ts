@@ -5,9 +5,9 @@ import { api, isApiConflict } from './client';
  *
  * GET    /api/lookup/item-categories
  * GET    /api/lookup/materials
- * POST   /api/item/catalog
- * POST   /api/item/catalog/QR
- * DELETE /api/item/catalog/QR/{qrId}?warehouseId=
+ * POST   /api/item
+ * POST   /api/item/{itemId}/qr
+ * DELETE /api/item/{itemId}/qr
  * GET    /api/warehouse/{warehouseId}/QR/{id}
  * PUT    /api/warehouse/{warehouseId}/location-unit/{id}/item/{itemId}
  * GET    /api/warehouse/{warehouseId}/item?location=none|set
@@ -71,11 +71,6 @@ export type CreateCatalogItemBody = {
   material?: string | null;
 };
 
-export type CreateItemQrBody = {
-  warehouseId: string;
-  itemId: string;
-};
-
 export type ResolveQrResponse = {
   qrCode: CatalogQrCode;
   typeCode: number;
@@ -121,37 +116,30 @@ export async function fetchItemMaterials(): Promise<ItemMaterialOption[]> {
   return data.materials;
 }
 
-/** POST /api/item/catalog */
+/** POST /api/item */
 export async function createCatalogItem(
   body: CreateCatalogItemBody,
 ): Promise<CatalogItem> {
   const { data } = await api.post<{ item: CatalogItem }>(
-    '/api/item/catalog',
+    '/api/item',
     body,
   );
   return data.item;
 }
 
-/** POST /api/item/catalog/QR */
+/** POST /api/item/{itemId}/qr */
 export async function createItemQr(
-  body: CreateItemQrBody,
+  itemId: string,
 ): Promise<{ qrCode: CatalogQrCode; item: CatalogItem }> {
   const { data } = await api.post<{ qrCode: CatalogQrCode; item: CatalogItem }>(
-    '/api/item/catalog/QR',
-    body,
+    `/api/item/${itemId}/qr`,
   );
   return data;
 }
 
-/** DELETE /api/item/catalog/QR/{qrId}?warehouseId= */
-export async function deleteItemQr(
-  warehouseId: string,
-  qrId: string,
-): Promise<DeleteAck> {
-  const { data } = await api.delete<DeleteAck>(
-    `/api/item/catalog/QR/${qrId}`,
-    { params: { warehouseId } },
-  );
+/** DELETE /api/item/{itemId}/qr */
+export async function deleteItemQr(itemId: string): Promise<DeleteAck> {
+  const { data } = await api.delete<DeleteAck>(`/api/item/${itemId}/qr`);
   return data;
 }
 
@@ -231,7 +219,7 @@ export async function ensureItemQrPayload(
   }
 
   try {
-    const created = await createItemQr({ warehouseId, itemId: item.id });
+    const created = await createItemQr(item.id);
     const payload = payloadFromQr(created.qrCode);
     if (!payload) {
       throw new Error('QR code was created without a printable payload.');

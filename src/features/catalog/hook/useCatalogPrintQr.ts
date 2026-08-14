@@ -88,10 +88,10 @@ export function useCatalogPrintQr({
       const current = seedItem();
       const existingId = current.qrCodeId ?? qrCode?.id;
       if (existingId) {
-        await deleteItemQr(warehouseId, existingId);
+        await deleteItemQr(itemId);
       }
 
-      const created = await createItemQr({ warehouseId, itemId });
+      const created = await createItemQr(itemId);
       const payload =
         created.qrCode.payload?.trim() || created.qrCode.id.trim();
       setItem(created.item);

@@ -63,6 +63,38 @@ export type MainStackParamList = {
     /** Create finishes on Main Menu; add/move return to the Catalog hub. */
     doneTarget?: 'hub' | 'main';
   };
+  OrderList: {
+    mode: 'pickup' | 'return';
+  };
+  OrderDetail: {
+    orderId: string;
+    mode: 'pickup' | 'return';
+  };
+  OrderScanItem: {
+    orderId: string;
+    mode: 'pickup' | 'return';
+  };
+  OrderQty: {
+    orderId: string;
+    mode: 'pickup' | 'return';
+    itemId: string;
+    itemName: string;
+    remaining: number;
+    locationLabel?: string | null;
+  };
+  OrderScanLocation: {
+    orderId: string;
+    itemId: string;
+    itemName: string;
+    qty: number;
+    locationLabel?: string | null;
+  };
+  OrderIssue: {
+    orderId: string;
+    itemId: string;
+    itemName: string;
+    remaining: number;
+  };
   PrintPoC: undefined;
   ImgUploadPoC: undefined;
 };

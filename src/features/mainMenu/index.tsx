@@ -38,6 +38,8 @@ export function MainMenu() {
       {...menu}
       onManageWarehouse={onManageWarehouse}
       onCatalog={onCatalog}
+      onPickup={() => navigation.navigate('OrderList', { mode: 'pickup' })}
+      onReturn={() => navigation.navigate('OrderList', { mode: 'return' })}
       onPrintPoC={() => navigation.navigate('PrintPoC')}
       onImgUpload={() => navigation.navigate('ImgUploadPoC')}
     />

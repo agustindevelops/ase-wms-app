@@ -7,15 +7,13 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import type { UseMainMenuResult } from '../hook/useMainMenu';
 
-const upcoming = [
-  { key: 'pickup', label: 'Pickup Order' },
-  { key: 'return', label: 'Return Order' },
-  { key: 'issue', label: 'Report Issue' },
-] as const;
+const upcoming = [{ key: 'issue', label: 'Report Issue' }] as const;
 
 export type MainMenuViewProps = UseMainMenuResult & {
   onManageWarehouse: () => void;
   onCatalog: () => void;
+  onPickup: () => void;
+  onReturn: () => void;
   onPrintPoC: () => void;
   onImgUpload: () => void;
 };
@@ -29,6 +27,8 @@ export function MainMenuView({
   handleSignOut,
   onManageWarehouse,
   onCatalog,
+  onPickup,
+  onReturn,
   onPrintPoC,
   onImgUpload,
 }: MainMenuViewProps) {
@@ -71,6 +71,13 @@ export function MainMenuView({
 
         <Button onPress={onManageWarehouse} disabled={blocked}>
           <ButtonText>Manage Warehouse</ButtonText>
+        </Button>
+
+        <Button onPress={onPickup} disabled={blocked}>
+          <ButtonText>Pickup Order</ButtonText>
+        </Button>
+        <Button onPress={onReturn} disabled={blocked}>
+          <ButtonText>Return Order</ButtonText>
         </Button>
 
         {upcoming.map((item) => (
