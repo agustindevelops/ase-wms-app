@@ -7,15 +7,12 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import type { UseMainMenuResult } from '../hook/useMainMenu';
 
-const upcoming = [{ key: 'issue', label: 'Report Issue' }] as const;
-
 export type MainMenuViewProps = UseMainMenuResult & {
   onManageWarehouse: () => void;
   onCatalog: () => void;
   onPickup: () => void;
   onReturn: () => void;
-  onPrintPoC: () => void;
-  onImgUpload: () => void;
+  onReportIssue: () => void;
 };
 
 export function MainMenuView({
@@ -29,8 +26,7 @@ export function MainMenuView({
   onCatalog,
   onPickup,
   onReturn,
-  onPrintPoC,
-  onImgUpload,
+  onReportIssue,
 }: MainMenuViewProps) {
   const blocked = busy || signingOut || !me;
 
@@ -79,23 +75,8 @@ export function MainMenuView({
         <Button onPress={onReturn} disabled={blocked}>
           <ButtonText>Return Order</ButtonText>
         </Button>
-
-        {upcoming.map((item) => (
-          <Button key={item.key} variant="outline" disabled>
-            <ButtonText>{item.label}</ButtonText>
-          </Button>
-        ))}
-
-        <Button
-          variant="secondary"
-          className="mt-4"
-          onPress={onPrintPoC}
-          disabled={signingOut}
-        >
-          <ButtonText>Print PoC</ButtonText>
-        </Button>
-        <Button variant="secondary" onPress={onImgUpload} disabled={signingOut}>
-          <ButtonText>Image upload</ButtonText>
+        <Button onPress={onReportIssue} disabled={blocked}>
+          <ButtonText>Report Issue</ButtonText>
         </Button>
 
         <Button

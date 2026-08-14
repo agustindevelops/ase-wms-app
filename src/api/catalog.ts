@@ -10,7 +10,8 @@ import { api, isApiConflict } from './client';
  * DELETE /api/item/{itemId}/qr
  * GET    /api/warehouse/{warehouseId}/QR/{id}
  * PUT    /api/warehouse/{warehouseId}/location-unit/{id}/item/{itemId}
- * GET    /api/warehouse/{warehouseId}/item?location=none|set
+ * GET    /api/item/{itemId}
+ * GET    /api/warehouse/{warehouseId}/item?location=none|set|all&q=
  * DELETE /api/warehouse/{warehouseId}/item/{itemId}/location
  */
 
@@ -42,6 +43,7 @@ export type CatalogItem = {
   categoryId: string | null;
   locationUnitId: string | null;
   qrCodeId: string | null;
+  disposition?: string | null;
   createdAt: string;
   updatedAt: string;
   category: ItemCategory | null;
@@ -166,18 +168,26 @@ export async function bindItemToLocation(
   return data.item;
 }
 
-export type WarehouseItemLocationFilter = 'none' | 'set';
+export type WarehouseItemLocationFilter = 'none' | 'set' | 'all';
 
-/** GET /api/warehouse/{warehouseId}/item?location=none|set */
+/** GET /api/item/{itemId} */
+export async function fetchCatalogItem(itemId: string): Promise<CatalogItem> {
+  const { data } = await api.get<{ item: CatalogItem }>(`/api/item/${itemId}`);
+  return data.item;
+}
+
+/** GET /api/warehouse/{warehouseId}/item?location=none|set|all&q= */
 export async function fetchWarehouseItems(
   warehouseId: string,
-  location: WarehouseItemLocationFilter,
+  location: WarehouseItemLocationFilter = 'all',
+  q?: string,
 ): Promise<CatalogItem[]> {
+  const query = q?.trim();
   const { data } = await api.get<{ items: CatalogItem[] }>(
     `/api/warehouse/${warehouseId}/item`,
-    { params: { location } },
+    { params: { location, archived: '0', ...(query ? { q: query } : {}) } },
   );
-  return data.items;
+  return data.items.filter((item) => item.quantityOwned > 0);
 }
 
 /** DELETE /api/warehouse/{warehouseId}/item/{itemId}/location */

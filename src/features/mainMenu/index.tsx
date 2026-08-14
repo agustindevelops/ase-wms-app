@@ -40,8 +40,12 @@ export function MainMenu() {
       onCatalog={onCatalog}
       onPickup={() => navigation.navigate('OrderList', { mode: 'pickup' })}
       onReturn={() => navigation.navigate('OrderList', { mode: 'return' })}
-      onPrintPoC={() => navigation.navigate('PrintPoC')}
-      onImgUpload={() => navigation.navigate('ImgUploadPoC')}
+      onReportIssue={() => {
+        if (!menu.me) return;
+        navigation.navigate('ReportIssueFind', {
+          warehouseId: menu.me.warehouse.id,
+        });
+      }}
     />
   );
 }

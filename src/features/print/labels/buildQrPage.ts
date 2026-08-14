@@ -1,9 +1,5 @@
 import { PrintPage } from 'react-native-niimblue-lib';
-import {
-  LABEL_HEIGHT,
-  LABEL_ID,
-  LABEL_WIDTH,
-} from '@/config/printer';
+import { LABEL_HEIGHT, LABEL_WIDTH } from '@/config/printer';
 import { addFittedBitmapText } from './bitmapText';
 import { assertEncodedSize, type EncodedImage } from './assertEncodedSize';
 
@@ -16,7 +12,7 @@ const TEXT_GAP = 8;
  * space to its right. The QR carries the id; the text is for humans.
  */
 export function buildQrPage(
-  payload: string = LABEL_ID,
+  payload: string,
   options?: { text?: string },
 ): EncodedImage {
   const page = new PrintPage(LABEL_WIDTH, LABEL_HEIGHT, 'landscape');

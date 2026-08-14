@@ -1,6 +1,3 @@
-/** Shared ID for Code 128 and QR label tests. */
-export const LABEL_ID = '12345678';
-
 /** Android BLE default is 23 (20-byte payload) — too small for bitmap rows. */
 export const REQUESTED_MTU = 128;
 

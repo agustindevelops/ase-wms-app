@@ -6,12 +6,9 @@ import {
 import { useAppToast } from '@/components/ui/toast';
 import {
   DEVICE_SCAN_TIMEOUT_MS,
-  LABEL_ID,
   PRINT_DENSITY,
   REQUESTED_MTU,
 } from '@/config/printer';
-import type { ScannerKind } from '@/features/scan/hook/useScan';
-import { buildBarcodePage } from '../labels/buildBarcodePage';
 import { buildQrPage } from '../labels/buildQrPage';
 import { requestBluetoothPermissions } from './permissions';
 
@@ -20,7 +17,6 @@ function toMessage(error: unknown): string {
 }
 
 export type PrintStatus = 'idle' | 'working' | 'connected' | 'error';
-export type PrintMode = 'barcode' | 'qr';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -29,7 +25,6 @@ function sleep(ms: number): Promise<void> {
 export function usePrint() {
   const toast = useAppToast();
   const printer = useMemo(() => new NiimbotBluetoothClient(), []);
-  const [scannerKind, setScannerKind] = useState<ScannerKind | null>(null);
   const [status, setStatus] = useState<PrintStatus>('idle');
   const [message, setMessage] = useState('Turn on the D110, then connect.');
   const [deviceName, setDeviceName] = useState<string | null>(null);
@@ -109,17 +104,9 @@ export function usePrint() {
     }
   };
 
-  const print = async (
-    mode: PrintMode,
-    qrPayload: string = LABEL_ID,
-    labelText?: string,
-  ) => {
+  const printQrPayload = async (payload: string, labelText?: string) => {
     setStatus('working');
-    setMessage(
-      mode === 'barcode'
-        ? `Printing Code 128 + digits: ${LABEL_ID}…`
-        : `Printing label: ${labelText?.trim() || qrPayload}…`,
-    );
+    setMessage(`Printing label: ${labelText?.trim() || payload}…`);
 
     let task: ReturnType<typeof printer.createPrintTask> | undefined;
 
@@ -132,10 +119,7 @@ export function usePrint() {
       printer.stopHeartbeat();
       await sleep(300);
 
-      const encoded =
-        mode === 'barcode'
-          ? buildBarcodePage()
-          : buildQrPage(qrPayload, { text: labelText });
+      const encoded = buildQrPage(payload, { text: labelText });
 
       const totalBlackPixels = encoded.rowsData.reduce(
         (total, row) => total + row.blackPixelsCount * row.repeat,
@@ -176,11 +160,7 @@ export function usePrint() {
       await task.waitForFinished();
 
       setStatus('connected');
-      setMessage(
-        mode === 'barcode'
-          ? `Code 128 + digits printed: ${LABEL_ID}`
-          : `Printed: ${labelText?.trim() || qrPayload}`,
-      );
+      setMessage(`Printed: ${labelText?.trim() || payload}`);
     } catch (error) {
       const message = toMessage(error);
       setStatus('error');
@@ -198,21 +178,13 @@ export function usePrint() {
   };
 
   return {
-    labelId: LABEL_ID,
-    scannerKind,
     status,
     message,
     deviceName,
     printerSummary,
     busy,
     connect,
-    printBarcode: () => print('barcode'),
-    printQr: () => print('qr', LABEL_ID, LABEL_ID),
-    printQrPayload: (payload: string, labelText?: string) =>
-      print('qr', payload, labelText),
-    openBarcodeScanner: () => setScannerKind('barcode'),
-    openQrScanner: () => setScannerKind('qr'),
-    closeScanner: () => setScannerKind(null),
+    printQrPayload,
   };
 }
 

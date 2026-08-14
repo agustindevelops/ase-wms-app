@@ -21,10 +21,13 @@ import {
   OrderScanItem,
   OrderScanLocation,
 } from '@/features/order';
+import {
+  ReportIssueFind,
+  ReportIssueForm,
+  ReportIssueScan,
+} from '@/features/reportIssue';
 import { MainMenu } from '@/features/mainMenu';
 import { PrinterProvider } from '@/features/print/PrinterProvider';
-import { ImgUploadTabScreen } from '@/screens/ImgUploadTabScreen';
-import { PrintTabScreen } from '@/screens/PrintTabScreen';
 import type { MainStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -160,14 +163,19 @@ export function MainStack() {
         options={{ title: 'Report issue' }}
       />
       <Stack.Screen
-        name="PrintPoC"
-        component={PrintTabScreen}
-        options={{ title: 'Print PoC' }}
+        name="ReportIssueFind"
+        component={ReportIssueFind}
+        options={{ title: 'Report issue' }}
       />
       <Stack.Screen
-        name="ImgUploadPoC"
-        component={ImgUploadTabScreen}
-        options={{ title: 'Image upload' }}
+        name="ReportIssueScan"
+        component={ReportIssueScan}
+        options={{ title: 'Scan item', headerShown: false }}
+      />
+      <Stack.Screen
+        name="ReportIssueForm"
+        component={ReportIssueForm}
+        options={{ title: 'Report issue' }}
       />
       </Stack.Navigator>
     </PrinterProvider>

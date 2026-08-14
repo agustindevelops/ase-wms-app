@@ -95,6 +95,15 @@ export type MainStackParamList = {
     itemName: string;
     remaining: number;
   };
-  PrintPoC: undefined;
-  ImgUploadPoC: undefined;
+  ReportIssueFind: {
+    warehouseId: string;
+  };
+  ReportIssueScan: {
+    warehouseId: string;
+  };
+  ReportIssueForm: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+  };
 };

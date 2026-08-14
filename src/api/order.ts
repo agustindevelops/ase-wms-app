@@ -31,6 +31,7 @@ export type FulfillmentLine = {
     warehouseId: string;
     quantityOwned: number;
     quantityAvailable: number;
+    archived: boolean;
     locationLabel: string | null;
     locationUnit: {
       id: string;

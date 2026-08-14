@@ -33,13 +33,19 @@ export function OrderDetailView({
   onReportIssue,
 }: OrderDetailViewProps) {
   const remainingLines =
-    order?.lines.filter((line) => remainingForMode(line, mode) > 0) ?? [];
+    order?.lines.filter(
+      (line) => !line.item.archived && remainingForMode(line, mode) > 0,
+    ) ?? [];
   const sortedLines = order
-    ? [...order.lines].sort((a, b) => {
-        const aDone = remainingForMode(a, mode) === 0 ? 1 : 0;
-        const bDone = remainingForMode(b, mode) === 0 ? 1 : 0;
-        return aDone - bDone;
-      })
+    ? [...order.lines]
+        .filter(
+          (line) => !line.item.archived || remainingForMode(line, mode) > 0,
+        )
+        .sort((a, b) => {
+          const aDone = remainingForMode(a, mode) === 0 ? 1 : 0;
+          const bDone = remainingForMode(b, mode) === 0 ? 1 : 0;
+          return aDone - bDone;
+        })
     : [];
 
   return (
