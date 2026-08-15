@@ -6,42 +6,64 @@ type Args = {
   onEdit: (unit: LocationUnit) => void;
   onDelete: (unit: LocationUnit) => void;
   onPrint: (unit: LocationUnit) => void;
+  onLinkQr: (unit: LocationUnit) => void;
 };
 
-/** Long-press menu: edit / print label / delete. */
+/** Long-press menu: edit / print label / link existing QR / delete. */
 export function showLocationActions({
   unit,
   onEdit,
   onDelete,
   onPrint,
+  onLinkQr,
 }: Args) {
   const title = unit.name;
-  const message = hasLocationQr(unit)
-    ? `${unit.type.name} · has QR`
-    : unit.type.name;
+  const canLinkQr = !hasLocationQr(unit);
+  const message = canLinkQr ? unit.type.name : `${unit.type.name} · has QR`;
+
+  const actions: {
+    label: string;
+    destructive?: boolean;
+    run: () => void;
+  }[] = [
+    { label: 'Edit', run: () => onEdit(unit) },
+    { label: 'Print label', run: () => onPrint(unit) },
+  ];
+  if (canLinkQr) {
+    actions.push({
+      label: 'Link existing QR',
+      run: () => onLinkQr(unit),
+    });
+  }
+  actions.push({
+    label: 'Delete',
+    destructive: true,
+    run: () => onDelete(unit),
+  });
 
   if (Platform.OS === 'ios') {
+    const options = [...actions.map((action) => action.label), 'Cancel'];
     ActionSheetIOS.showActionSheetWithOptions(
       {
         title,
         message,
-        options: ['Edit', 'Print label', 'Delete', 'Cancel'],
-        cancelButtonIndex: 3,
-        destructiveButtonIndex: 2,
+        options,
+        cancelButtonIndex: options.length - 1,
+        destructiveButtonIndex: actions.findIndex((action) => action.destructive),
       },
       (index) => {
-        if (index === 0) onEdit(unit);
-        if (index === 1) onPrint(unit);
-        if (index === 2) onDelete(unit);
+        actions[index]?.run();
       },
     );
     return;
   }
 
   Alert.alert(title, message, [
-    { text: 'Edit', onPress: () => onEdit(unit) },
-    { text: 'Print label', onPress: () => onPrint(unit) },
-    { text: 'Delete', style: 'destructive', onPress: () => onDelete(unit) },
-    { text: 'Cancel', style: 'cancel' },
+    ...actions.map((action) => ({
+      text: action.label,
+      style: action.destructive ? ('destructive' as const) : ('default' as const),
+      onPress: action.run,
+    })),
+    { text: 'Cancel', style: 'cancel' as const },
   ]);
 }

@@ -10,6 +10,7 @@ import {
   CatalogScanLocation,
 } from '@/features/catalog';
 import { LocationUnitForm } from '@/features/manageWarehouse/LocationUnitForm';
+import { LinkLocationQr } from '@/features/manageWarehouse/LinkLocationQr';
 import { PrintLocationLabel } from '@/features/manageWarehouse/PrintLocationLabel';
 import { WarehouseForm } from '@/features/manageWarehouse/WarehouseForm';
 import { WarehouseLevel } from '@/features/manageWarehouse';
@@ -80,6 +81,11 @@ export function MainStack() {
             ? `Print ${route.params.locationName}`
             : 'Print Label',
         })}
+      />
+      <Stack.Screen
+        name="LinkLocationQr"
+        component={LinkLocationQr}
+        options={{ title: 'Link existing QR', headerShown: false }}
       />
       <Stack.Screen
         name="CatalogMenu"

@@ -27,6 +27,11 @@ export type MainStackParamList = {
     locationUnitId: string;
     locationName: string;
   };
+  LinkLocationQr: {
+    warehouseId: string;
+    locationUnitId: string;
+    locationName: string;
+  };
   CatalogMenu: {
     warehouseId: string;
   };

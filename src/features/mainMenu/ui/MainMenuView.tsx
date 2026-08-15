@@ -39,13 +39,14 @@ export function MainMenuView({
         </Heading>
         {me ? (
           <Text size="sm" className="text-brown-500 mb-2">
-            {me.warehouse.name} · {me.role.name}
+            {me.organization.name}
+            {me.warehouse ? ` · ${me.warehouse.name}` : ''} · {me.role.name}
           </Text>
         ) : busy ? (
           <Spinner />
         ) : (
           <Text size="sm" className="text-brown-500 mb-2">
-            Loading warehouse…
+            Loading organization…
           </Text>
         )}
 

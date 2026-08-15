@@ -28,7 +28,7 @@ export type FulfillmentLine = {
   item: {
     id: string;
     name: string;
-    warehouseId: string;
+    warehouseId: string | null;
     quantityOwned: number;
     quantityAvailable: number;
     archived: boolean;

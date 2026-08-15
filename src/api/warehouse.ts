@@ -12,7 +12,7 @@ import { api, isApiConflict } from './client';
  * POST   /api/warehouse/{warehouseId}/location-unit
  * PUT    /api/warehouse/{warehouseId}/location-unit/{id}
  * DELETE /api/warehouse/{warehouseId}/location-unit/{id}
- * POST   /api/warehouse/{warehouseId}/QR
+ * POST   /api/warehouse/{warehouseId}/QR  (optional payload = scanned label)
  * DELETE /api/warehouse/{warehouseId}/QR/{id}
  */
 
@@ -93,6 +93,8 @@ export type LocationUnitMutationResponse = {
 
 export type CreateQrBody = {
   locationUnitId: string;
+  /** Scanned label value. Omit to generate a printable QR (payload = id). */
+  payload?: string;
 };
 
 export type CreateQrResponse = {

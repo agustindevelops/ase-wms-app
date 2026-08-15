@@ -218,6 +218,14 @@ export function WarehouseLevel() {
     });
   };
 
+  const onLinkQr = (unit: LocationUnit) => {
+    navigation.navigate('LinkLocationQr', {
+      warehouseId: params.warehouseId,
+      locationUnitId: unit.id,
+      locationName: unit.name,
+    });
+  };
+
   return (
     <WarehouseLevelView
       {...level}
@@ -233,6 +241,7 @@ export function WarehouseLevel() {
       onEdit={onEdit}
       onEditCurrent={onEditCurrent}
       onPrint={onPrint}
+      onLinkQr={onLinkQr}
       onPrintAll={printAllChildren}
       onOpen={onOpen}
       onPrinterPress={onPrinterPress}

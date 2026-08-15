@@ -14,7 +14,9 @@ import { CONNECT_PRINTER_CLASS } from './buttonStyles';
 import { OnceButton } from './OnceButton';
 import { QrPreview } from './QrPreview';
 
-export type PrintLocationLabelViewProps = UsePrintLocationLabelResult;
+export type PrintLocationLabelViewProps = UsePrintLocationLabelResult & {
+  onScanExisting?: () => void;
+};
 
 export function PrintLocationLabelView({
   unit,
@@ -32,6 +34,7 @@ export function PrintLocationLabelView({
   shareLabel,
   connectPrinter,
   printLabel,
+  onScanExisting,
 }: PrintLocationLabelViewProps) {
   const busy = loading || ensuring || sharing || printerBusy;
 
@@ -52,7 +55,7 @@ export function PrintLocationLabelView({
                 <Text size="sm" className="text-brown-500">
                   {qrPayload
                     ? 'This location already has a QR. Print uses the same code.'
-                    : 'Print creates a location QR (type 1), then sends it to the D110.'}
+                    : 'Create a location QR (type 1) to print, or scan an existing label to link it.'}
                 </Text>
               </VStack>
               {qrPayload ? <QrPreview value={qrPayload} size={72} /> : null}
@@ -118,6 +121,16 @@ export function PrintLocationLabelView({
             <OnceButton onPress={() => ensureQr()} disabled={busy || !unit}>
               {ensuring ? <ButtonSpinner /> : null}
               <ButtonText>Create QR code</ButtonText>
+            </OnceButton>
+          ) : null}
+
+          {!qrPayload && onScanExisting ? (
+            <OnceButton
+              variant="outline"
+              onPress={onScanExisting}
+              disabled={busy || !unit}
+            >
+              <ButtonText>Scan existing label</ButtonText>
             </OnceButton>
           ) : null}
 

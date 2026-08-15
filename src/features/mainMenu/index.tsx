@@ -17,7 +17,7 @@ export function MainMenu() {
 
   const onManageWarehouse = () => {
     if (!menu.me) return;
-    // ASE-21: every warehouse route is scoped to the membership warehouse.
+    // Physical warehouse path; tenant is organizationId on the token.
     navigation.navigate('WarehouseLevel', {
       warehouseId: menu.me.warehouse.id,
       warehouseName: menu.me.warehouse.name,

@@ -32,6 +32,7 @@ export type WarehouseLevelViewProps = UseWarehouseLevelResult & {
   onEdit: (unit: LocationUnit) => void;
   onEditCurrent: () => void;
   onPrint: (unit: LocationUnit) => void | Promise<void>;
+  onLinkQr: (unit: LocationUnit) => void;
   onPrintAll: () => void | Promise<void>;
   onOpen: (unit: LocationUnit) => void;
   onPrinterPress: () => void | Promise<void>;
@@ -60,6 +61,7 @@ export function WarehouseLevelView({
   onEdit,
   onEditCurrent,
   onPrint,
+  onLinkQr,
   onPrintAll,
   onOpen,
   onPrinterPress,
@@ -77,6 +79,7 @@ export function WarehouseLevelView({
       onEdit,
       onDelete: confirmDelete,
       onPrint,
+      onLinkQr,
     });
   };
 
@@ -130,8 +133,19 @@ export function WarehouseLevelView({
             </ButtonText>
           </OnceButton>
 
+          {currentUnit && !currentQr ? (
+            <OnceButton
+              size="sm"
+              variant="outline"
+              onPress={() => onLinkQr(currentUnit)}
+              disabled={busy}
+            >
+              <ButtonText>Link existing QR</ButtonText>
+            </OnceButton>
+          ) : null}
+
           <Text size="xs" className="text-brown-500">
-            Tap a row to open the next level. Hold for edit, print, or delete.
+            Tap a row to open the next level. Hold for edit, print, link QR, or delete.
           </Text>
 
           {error ? (
@@ -239,6 +253,17 @@ export function WarehouseLevelView({
                     </Text>
                   </HStack>
                 </OncePressable>
+                {!qrPayload ? (
+                  <OnceButton
+                    size="sm"
+                    variant="ghost"
+                    onPress={() => onLinkQr(unit)}
+                    disabled={busy}
+                    className="shrink-0"
+                  >
+                    <ButtonText>Link QR</ButtonText>
+                  </OnceButton>
+                ) : null}
                 <OnceButton
                   size="sm"
                   variant="ghost"
