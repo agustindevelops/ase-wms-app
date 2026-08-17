@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "package": "com.ase.wmsapp",
+      "package": "com.ase.wms",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
