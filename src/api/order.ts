@@ -3,15 +3,15 @@ import { api } from './client';
 /**
  * ASE-4 pickup / return data contract.
  *
- * GET  /api/order/pickup
- * GET  /api/order/pickup/{orderId}
- * GET  /api/order/pickup/{orderId}/scan?payload=
- * POST /api/order/pickup/{orderId}
- * GET  /api/order/return
- * GET  /api/order/return/{orderId}
- * GET  /api/order/return/{orderId}/scan?payload=&itemId=
- * POST /api/order/return/{orderId}
- * POST /api/order/return/{orderId}/issue
+ * GET  /order/pickup
+ * GET  /order/pickup/{orderId}
+ * GET  /order/pickup/{orderId}/scan?payload=
+ * POST /order/pickup/{orderId}
+ * GET  /order/return
+ * GET  /order/return/{orderId}
+ * GET  /order/return/{orderId}/scan?payload=&itemId=
+ * POST /order/return/{orderId}
+ * POST /order/return/{orderId}/issue
  */
 
 export type OrderFulfillmentMode = 'pickup' | 'return';
@@ -69,7 +69,7 @@ export const QR_TYPE_ITEM = 0;
 export const QR_TYPE_LOCATION = 1;
 
 function basePath(mode: OrderFulfillmentMode) {
-  return mode === 'pickup' ? '/api/order/pickup' : '/api/order/return';
+  return mode === 'pickup' ? '/order/pickup' : '/order/return';
 }
 
 export async function listFulfillmentOrders(
@@ -108,7 +108,7 @@ export async function pickOrderLine(
   qty: number,
 ): Promise<FulfillmentOrder> {
   const { data } = await api.post<{ order: FulfillmentOrder }>(
-    `/api/order/pickup/${orderId}`,
+    `/order/pickup/${orderId}`,
     { itemId, qty },
   );
   return data.order;
@@ -121,7 +121,7 @@ export async function returnOrderLine(
   locationUnitId: string,
 ): Promise<FulfillmentOrder> {
   const { data } = await api.post<{ order: FulfillmentOrder }>(
-    `/api/order/return/${orderId}`,
+    `/order/return/${orderId}`,
     { itemId, qty, locationUnitId },
   );
   return data.order;
@@ -137,7 +137,7 @@ export async function reportReturnIssue(
   },
 ): Promise<FulfillmentOrder> {
   const { data } = await api.post<{ order: FulfillmentOrder }>(
-    `/api/order/return/${orderId}/issue`,
+    `/order/return/${orderId}/issue`,
     body,
   );
   return data.order;

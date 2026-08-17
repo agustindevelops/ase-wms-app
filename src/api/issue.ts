@@ -3,7 +3,7 @@ import { api } from './client';
 /**
  * ASE-25 standalone report issue.
  *
- * POST /api/item/{itemId}/issue
+ * POST /item/{itemId}/issue
  */
 
 export type IssueType = 'MISSING' | 'BROKEN';
@@ -26,7 +26,7 @@ export async function createItemIssue(
   },
 ): Promise<CreatedIssue> {
   const { data } = await api.post<{ issue: CreatedIssue }>(
-    `/api/item/${itemId}/issue`,
+    `/item/${itemId}/issue`,
     body,
   );
   return data.issue;

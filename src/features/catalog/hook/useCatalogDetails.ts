@@ -1,9 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { apiErrorMessage } from '@/api/client';
 import {
   createCatalogItem,
+  fetchCatalogItem,
   fetchItemCategories,
   fetchItemMaterials,
+  updateCatalogItem,
   type CatalogItem,
   type ItemCategory,
   type ItemMaterialOption,
@@ -12,9 +14,15 @@ import {
 type Args = {
   warehouseId: string;
   photoFileIds: string[];
+  itemId?: string | null;
 };
 
-export function useCatalogDetails({ warehouseId, photoFileIds }: Args) {
+export function useCatalogDetails({
+  warehouseId,
+  photoFileIds,
+  itemId: initialItemId,
+}: Args) {
+  const [itemId, setItemId] = useState<string | null>(initialItemId ?? null);
   const [name, setName] = useState('');
   const [quantityText, setQuantityText] = useState('1');
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -24,6 +32,12 @@ export function useCatalogDetails({ warehouseId, photoFileIds }: Args) {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialItemId && initialItemId !== itemId) {
+      setItemId(initialItemId);
+    }
+  }, [initialItemId, itemId]);
 
   const loadCategories = useCallback(async () => {
     setLoadingCategories(true);
@@ -39,6 +53,19 @@ export function useCatalogDetails({ warehouseId, photoFileIds }: Args) {
       setError(apiErrorMessage(cause));
     } finally {
       setLoadingCategories(false);
+    }
+  }, []);
+
+  const loadItem = useCallback(async (id: string) => {
+    try {
+      const item = await fetchCatalogItem(id);
+      setName(item.name);
+      setQuantityText(String(item.quantityOwned || 1));
+      setCategoryId(item.categoryId);
+      setMaterial(item.material ?? null);
+      setItemId(item.id);
+    } catch (cause) {
+      setError(apiErrorMessage(cause));
     }
   }, []);
 
@@ -64,23 +91,28 @@ export function useCatalogDetails({ warehouseId, photoFileIds }: Args) {
     setBusy(true);
     setError(null);
     try {
-      return await createCatalogItem({
-        warehouseId,
+      const fields = {
         name: trimmedName,
         quantity,
         photoFileIds,
         categoryId,
         material,
-      });
+      };
+      const item = itemId
+        ? await updateCatalogItem(itemId, fields)
+        : await createCatalogItem({ warehouseId, ...fields });
+      setItemId(item.id);
+      return item;
     } catch (cause) {
       setError(apiErrorMessage(cause));
       return null;
     } finally {
       setBusy(false);
     }
-  }, [categoryId, material, name, photoFileIds, quantityText, warehouseId]);
+  }, [categoryId, itemId, material, name, photoFileIds, quantityText, warehouseId]);
 
   return {
+    itemId,
     name,
     quantityText,
     categoryId,
@@ -90,11 +122,13 @@ export function useCatalogDetails({ warehouseId, photoFileIds }: Args) {
     loadingCategories,
     busy,
     error,
+    setItemId,
     setName,
     setQuantityText,
     setCategoryId,
     setMaterial,
     loadCategories,
+    loadItem,
     submit,
   };
 }

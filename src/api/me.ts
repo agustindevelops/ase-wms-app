@@ -32,13 +32,13 @@ export type MeResponse = {
 };
 
 /**
- * GET /api/me — user + organization from ORGANIZATION_MEMBERSHIP.
+ * GET /me — user + organization from ORGANIZATION_MEMBERSHIP.
  * Catalog / Manage Warehouse still use warehouse.id as the path param.
  */
 export async function fetchMe(): Promise<MeResponse> {
   const { data } = await api.get<Omit<MeResponse, 'warehouse'> & {
     warehouse?: MeWarehouse;
-  }>('/api/me');
+  }>('/me');
   if (data.tokenRefreshRequired) {
     const user = getFirebaseAuth().currentUser;
     if (user) {

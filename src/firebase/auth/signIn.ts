@@ -22,7 +22,7 @@ export async function signIn(email: string, password: string): Promise<void> {
   }
 
   try {
-    const response = await fetch(`${aseWmsApiUrl.replace(/\/$/, '')}/api/login`, {
+    const response = await fetch(`${aseWmsApiUrl.replace(/\/$/, '')}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: trimmed, password }),

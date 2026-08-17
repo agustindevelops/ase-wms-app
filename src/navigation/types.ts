@@ -37,6 +37,8 @@ export type MainStackParamList = {
   };
   CatalogPhoto: {
     warehouseId: string;
+    /** Set after the first save so going back to photos still updates. */
+    itemId?: string;
   };
   CatalogItemList: {
     warehouseId: string;
@@ -49,6 +51,7 @@ export type MainStackParamList = {
   CatalogDetails: {
     warehouseId: string;
     photoFileIds: string[];
+    itemId?: string;
   };
   CatalogPrintQr: {
     warehouseId: string;

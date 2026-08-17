@@ -23,6 +23,7 @@ export function CatalogPhoto() {
         navigation.navigate('CatalogDetails', {
           warehouseId: params.warehouseId,
           photoFileIds: photo.photoFileIds,
+          itemId: params.itemId,
         });
       }}
     />

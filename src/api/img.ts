@@ -46,7 +46,7 @@ export type ReadImageResponse = {
 export async function signImageUpload(
   body: SignUploadRequest,
 ): Promise<SignUploadResponse> {
-  const { data } = await api.post<SignUploadResponse>('/api/img/upload', body);
+  const { data } = await api.post<SignUploadResponse>('/img/upload', body);
   return data;
 }
 
@@ -73,7 +73,7 @@ export async function putSignedUpload(input: {
 export async function verifyImageUpload(
   fileId: string,
 ): Promise<VerifyUploadResponse> {
-  const { data } = await api.post<VerifyUploadResponse>('/api/img/verify', {
+  const { data } = await api.post<VerifyUploadResponse>('/img/verify', {
     file_id: fileId,
   });
   return data;
@@ -83,7 +83,7 @@ export async function verifyImageUpload(
 export async function fetchTestImage(
   fileId: string,
 ): Promise<ReadImageResponse> {
-  const { data } = await api.get<ReadImageResponse>('/api/test/img', {
+  const { data } = await api.get<ReadImageResponse>('/test/img', {
     params: { file_id: fileId },
   });
   return data;
@@ -91,5 +91,5 @@ export async function fetchTestImage(
 
 /** Owner-scoped delete of an uploaded/created file. */
 export async function deleteImageUpload(fileId: string): Promise<void> {
-  await api.delete(`/api/img/${fileId}`);
+  await api.delete(`/img/${fileId}`);
 }

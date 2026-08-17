@@ -39,6 +39,7 @@ function OptionRow({
 }
 
 export function CatalogDetailsView({
+  itemId,
   name,
   quantityText,
   categoryId,
@@ -162,7 +163,7 @@ export function CatalogDetailsView({
 
             <Button className="mt-1" onPress={() => void onSubmit()} disabled={busy}>
               {busy ? <ButtonSpinner /> : null}
-              <ButtonText>Save item</ButtonText>
+              <ButtonText>{itemId ? 'Update item' : 'Save item'}</ButtonText>
             </Button>
           </VStack>
         </ScrollView>

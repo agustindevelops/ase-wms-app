@@ -3,16 +3,16 @@ import { api, isApiConflict } from './client';
 /**
  * ASE-3 catalog data contract.
  *
- * GET    /api/lookup/item-categories
- * GET    /api/lookup/materials
- * POST   /api/item
- * POST   /api/item/{itemId}/qr
- * DELETE /api/item/{itemId}/qr
- * GET    /api/warehouse/{warehouseId}/QR/{id}
- * PUT    /api/warehouse/{warehouseId}/location-unit/{id}/item/{itemId}
- * GET    /api/item/{itemId}
- * GET    /api/warehouse/{warehouseId}/item?location=none|set|all&q=
- * DELETE /api/warehouse/{warehouseId}/item/{itemId}/location
+ * GET    /lookup/item-categories
+ * GET    /lookup/materials
+ * POST   /item
+ * POST   /item/{itemId}/qr
+ * DELETE /item/{itemId}/qr
+ * GET    /warehouse/{warehouseId}/QR/{id}
+ * PUT    /warehouse/{warehouseId}/location-unit/{id}/item/{itemId}
+ * GET    /item/{itemId}
+ * GET    /warehouse/{warehouseId}/item?location=none|set|all&q=
+ * DELETE /warehouse/{warehouseId}/item/{itemId}/location
  */
 
 export type ItemCategory = {
@@ -41,6 +41,7 @@ export type CatalogItem = {
   quantityOwned: number;
   quantityAvailable: number;
   categoryId: string | null;
+  material?: string | null;
   locationUnitId: string | null;
   qrCodeId: string | null;
   disposition?: string | null;
@@ -69,6 +70,14 @@ export type CreateCatalogItemBody = {
   name: string;
   quantity: number;
   photoFileIds: string[];
+  categoryId?: string | null;
+  material?: string | null;
+};
+
+export type UpdateCatalogItemBody = {
+  name?: string;
+  quantity?: number;
+  photoFileIds?: string[];
   categoryId?: string | null;
   material?: string | null;
 };
@@ -102,81 +111,93 @@ export type DeleteAck = {
   deleted: true;
 };
 
-/** GET /api/lookup/item-categories */
+/** GET /lookup/item-categories */
 export async function fetchItemCategories(): Promise<ItemCategory[]> {
   const { data } = await api.get<{ categories: ItemCategory[] }>(
-    '/api/lookup/item-categories',
+    '/lookup/item-categories',
   );
   return data.categories;
 }
 
-/** GET /api/lookup/materials */
+/** GET /lookup/materials */
 export async function fetchItemMaterials(): Promise<ItemMaterialOption[]> {
   const { data } = await api.get<{ materials: ItemMaterialOption[] }>(
-    '/api/lookup/materials',
+    '/lookup/materials',
   );
   return data.materials;
 }
 
-/** POST /api/item */
+/** POST /item */
 export async function createCatalogItem(
   body: CreateCatalogItemBody,
 ): Promise<CatalogItem> {
   const { data } = await api.post<{ item: CatalogItem }>(
-    '/api/item',
+    '/item',
     body,
   );
   return data.item;
 }
 
-/** POST /api/item/{itemId}/qr */
+/** PATCH /item/{itemId} */
+export async function updateCatalogItem(
+  itemId: string,
+  body: UpdateCatalogItemBody,
+): Promise<CatalogItem> {
+  const { data } = await api.patch<{ item: CatalogItem }>(
+    `/item/${itemId}`,
+    body,
+  );
+  return data.item;
+}
+
+/** POST /item/{itemId}/qr */
 export async function createItemQr(
   itemId: string,
 ): Promise<{ qrCode: CatalogQrCode; item: CatalogItem }> {
   const { data } = await api.post<{ qrCode: CatalogQrCode; item: CatalogItem }>(
-    `/api/item/${itemId}/qr`,
+    `/item/${itemId}/qr`,
   );
   return data;
 }
 
-/** DELETE /api/item/{itemId}/qr */
+/** DELETE /item/{itemId}/qr */
 export async function deleteItemQr(itemId: string): Promise<DeleteAck> {
-  const { data } = await api.delete<DeleteAck>(`/api/item/${itemId}/qr`);
+  const { data } = await api.delete<DeleteAck>(`/item/${itemId}/qr`);
   return data;
 }
 
-/** GET /api/warehouse/{warehouseId}/QR/{id} — id or payload. */
+/** GET /warehouse/{warehouseId}/QR/{id} — id or payload. */
 export async function resolveWarehouseQr(
   warehouseId: string,
   idOrPayload: string,
 ): Promise<ResolveQrResponse> {
   const { data } = await api.get<ResolveQrResponse>(
-    `/api/warehouse/${warehouseId}/QR/${encodeURIComponent(idOrPayload)}`,
+    `/warehouse/${warehouseId}/QR/${encodeURIComponent(idOrPayload)}`,
   );
   return data;
 }
 
-/** PUT /api/warehouse/{warehouseId}/location-unit/{locationUnitId}/item/{itemId} */
+/** PUT /warehouse/{warehouseId}/location-unit/{locationUnitId}/item/{itemId} */
 export async function bindItemToLocation(
   warehouseId: string,
   locationUnitId: string,
   itemId: string,
 ): Promise<CatalogItem> {
   const { data } = await api.put<{ item: CatalogItem }>(
-    `/api/warehouse/${warehouseId}/location-unit/${locationUnitId}/item/${itemId}`,
+    `/warehouse/${warehouseId}/location-unit/${locationUnitId}/item/${itemId}`,
   );
   return data.item;
 }
 
 export type WarehouseItemLocationFilter = 'none' | 'set' | 'all';
 
-/** GET /api/item/{itemId} */
+/** GET /item/{itemId} */
 export async function fetchCatalogItem(itemId: string): Promise<CatalogItem> {
-  const { data } = await api.get<{ item: CatalogItem }>(`/api/item/${itemId}`);
+  const { data } = await api.get<{ item: CatalogItem }>(`/item/${itemId}`);
   return data.item;
 }
 
-/** GET /api/warehouse/{warehouseId}/item?location=none|set|all&q= */
+/** GET /warehouse/{warehouseId}/item?location=none|set|all&q= */
 export async function fetchWarehouseItems(
   warehouseId: string,
   location: WarehouseItemLocationFilter = 'all',
@@ -184,19 +205,19 @@ export async function fetchWarehouseItems(
 ): Promise<CatalogItem[]> {
   const query = q?.trim();
   const { data } = await api.get<{ items: CatalogItem[] }>(
-    `/api/warehouse/${warehouseId}/item`,
+    `/warehouse/${warehouseId}/item`,
     { params: { location, archived: '0', ...(query ? { q: query } : {}) } },
   );
   return data.items.filter((item) => item.quantityOwned > 0);
 }
 
-/** DELETE /api/warehouse/{warehouseId}/item/{itemId}/location */
+/** DELETE /warehouse/{warehouseId}/item/{itemId}/location */
 export async function unbindItemLocation(
   warehouseId: string,
   itemId: string,
 ): Promise<CatalogItem> {
   const { data } = await api.delete<{ item: CatalogItem }>(
-    `/api/warehouse/${warehouseId}/item/${itemId}/location`,
+    `/warehouse/${warehouseId}/item/${itemId}/location`,
   );
   return data.item;
 }

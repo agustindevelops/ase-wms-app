@@ -6,14 +6,14 @@ import { api, isApiConflict } from './client';
  * Prisma JSON dates arrive as ISO strings. Nested relations match
  * locationUnitInclude: `type` and `qrCode` (not `locationUnitType`).
  *
- * GET    /api/warehouse/{warehouseId}
- * PUT    /api/warehouse/{warehouseId}
- * GET    /api/warehouse/{warehouseId}/location-unit/{id}
- * POST   /api/warehouse/{warehouseId}/location-unit
- * PUT    /api/warehouse/{warehouseId}/location-unit/{id}
- * DELETE /api/warehouse/{warehouseId}/location-unit/{id}
- * POST   /api/warehouse/{warehouseId}/QR  (optional payload = scanned label)
- * DELETE /api/warehouse/{warehouseId}/QR/{id}
+ * GET    /warehouse/{warehouseId}
+ * PUT    /warehouse/{warehouseId}
+ * GET    /warehouse/{warehouseId}/location-unit/{id}
+ * POST   /warehouse/{warehouseId}/location-unit
+ * PUT    /warehouse/{warehouseId}/location-unit/{id}
+ * DELETE /warehouse/{warehouseId}/location-unit/{id}
+ * POST   /warehouse/{warehouseId}/QR  (optional payload = scanned label)
+ * DELETE /warehouse/{warehouseId}/QR/{id}
  */
 
 export type WarehouseAddress = {
@@ -107,82 +107,82 @@ export type DeleteAck = {
   deleted: true;
 };
 
-/** GET /api/warehouse/{warehouseId} */
+/** GET /warehouse/{warehouseId} */
 export async function fetchWarehouseRoot(
   warehouseId: string,
 ): Promise<WarehouseRootResponse> {
   const { data } = await api.get<WarehouseRootResponse>(
-    `/api/warehouse/${warehouseId}`,
+    `/warehouse/${warehouseId}`,
   );
   return data;
 }
 
-/** PUT /api/warehouse/{warehouseId} */
+/** PUT /warehouse/{warehouseId} */
 export async function updateWarehouse(
   warehouseId: string,
   body: WarehouseWriteBody,
 ): Promise<Warehouse> {
   const { data } = await api.put<WarehouseMutationResponse>(
-    `/api/warehouse/${warehouseId}`,
+    `/warehouse/${warehouseId}`,
     body,
   );
   return data.warehouse;
 }
 
-/** GET /api/warehouse/{warehouseId}/location-unit/{id} */
+/** GET /warehouse/{warehouseId}/location-unit/{id} */
 export async function fetchLocationUnit(
   warehouseId: string,
   locationUnitId: string,
 ): Promise<LocationUnitDetailResponse> {
   const { data } = await api.get<LocationUnitDetailResponse>(
-    `/api/warehouse/${warehouseId}/location-unit/${locationUnitId}`,
+    `/warehouse/${warehouseId}/location-unit/${locationUnitId}`,
   );
   return data;
 }
 
-/** POST /api/warehouse/{warehouseId}/location-unit */
+/** POST /warehouse/{warehouseId}/location-unit */
 export async function createLocationUnit(
   warehouseId: string,
   body: LocationUnitWriteBody,
 ): Promise<LocationUnit> {
   const { data } = await api.post<LocationUnitMutationResponse>(
-    `/api/warehouse/${warehouseId}/location-unit`,
+    `/warehouse/${warehouseId}/location-unit`,
     body,
   );
   return data.locationUnit;
 }
 
-/** PUT /api/warehouse/{warehouseId}/location-unit/{id} */
+/** PUT /warehouse/{warehouseId}/location-unit/{id} */
 export async function updateLocationUnit(
   warehouseId: string,
   locationUnitId: string,
   body: LocationUnitWriteBody,
 ): Promise<LocationUnit> {
   const { data } = await api.put<LocationUnitMutationResponse>(
-    `/api/warehouse/${warehouseId}/location-unit/${locationUnitId}`,
+    `/warehouse/${warehouseId}/location-unit/${locationUnitId}`,
     body,
   );
   return data.locationUnit;
 }
 
-/** DELETE /api/warehouse/{warehouseId}/location-unit/{id} */
+/** DELETE /warehouse/{warehouseId}/location-unit/{id} */
 export async function deleteLocationUnit(
   warehouseId: string,
   locationUnitId: string,
 ): Promise<DeleteAck> {
   const { data } = await api.delete<DeleteAck>(
-    `/api/warehouse/${warehouseId}/location-unit/${locationUnitId}`,
+    `/warehouse/${warehouseId}/location-unit/${locationUnitId}`,
   );
   return data;
 }
 
-/** POST /api/warehouse/{warehouseId}/QR */
+/** POST /warehouse/{warehouseId}/QR */
 export async function createLocationQr(
   warehouseId: string,
   body: CreateQrBody,
 ): Promise<CreateQrResponse> {
   const { data } = await api.post<CreateQrResponse>(
-    `/api/warehouse/${warehouseId}/QR`,
+    `/warehouse/${warehouseId}/QR`,
     body,
   );
   return data;
