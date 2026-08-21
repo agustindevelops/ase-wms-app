@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,9 +21,10 @@ def command(name: str) -> tuple[str, dict[str, str]]:
         return "npx expo start --dev-client", env
     if name == "build":
         BUILDS.mkdir(exist_ok=True)
-        env["EAS_LOCAL_BUILD_ARTIFACTS_DIR"] = str(BUILDS)
+        output = BUILDS / f"build-{int(time.time() * 1000)}.aab"
         return (
-            "npx eas-cli build --platform android --profile production --local",
+            "npx eas-cli build --platform android --profile production --local "
+            f'--output "{output}"',
             env,
         )
     if name == "push":
