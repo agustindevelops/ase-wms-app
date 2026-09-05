@@ -1,9 +1,6 @@
 /** Public env — 12-factor config (Expo `EXPO_PUBLIC_*`). */
 
-export const aseWisApiUrl =
-  process.env.EXPO_PUBLIC_ASE_WIS_API_URL ??
-  process.env.EXPO_PUBLIC_ASE_WMS_API_URL ??
-  '';
+export const aseWisApiUrl = process.env.EXPO_PUBLIC_ASE_WIS_API_URL ?? '';
 
 export const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '',

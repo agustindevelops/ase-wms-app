@@ -45,3 +45,4 @@ builds/
 
 #creds
 .env
+.env.prod
