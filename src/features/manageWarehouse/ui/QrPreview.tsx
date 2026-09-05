@@ -19,7 +19,7 @@ export function QrPreview({ value, size = 32 }: QrPreviewProps) {
         value={payload}
         size={size}
         ecl="M"
-        color="#3d2c1e"
+        color="#5e5045"
         backgroundColor="#ffffff"
         quietZone={2}
       />

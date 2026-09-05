@@ -37,8 +37,8 @@ export function ScanView({
 }: ScanViewProps) {
   if (!permission) {
     return (
-      <SafeAreaView className="flex-1 bg-background justify-center p-6">
-        <Text size="md" className="text-muted-foreground">
+      <SafeAreaView className="flex-1 bg-cream justify-center p-6">
+        <Text size="md" className="text-brown-500">
           Checking camera permission…
         </Text>
       </SafeAreaView>
@@ -47,13 +47,13 @@ export function ScanView({
 
   if (!permission.granted) {
     return (
-      <SafeAreaView className="flex-1 bg-background justify-center p-6">
+      <SafeAreaView className="flex-1 bg-cream justify-center p-6">
         <StatusBar style="dark" />
         <VStack className="gap-3.5">
-          <Heading size="xl" className="text-foreground">
+          <Heading size="xl">
             {config.title}
           </Heading>
-          <Text size="md" className="text-muted-foreground leading-6">
+          <Text size="md" className="text-brown-500 leading-6">
             Camera access is required to scan{' '}
             {kind === 'qr' ? 'QR codes' : 'barcodes'}.
           </Text>
@@ -83,7 +83,7 @@ export function ScanView({
           <Heading size="xl" className="text-white">
             {config.title}
           </Heading>
-          <Text size="sm" className="text-zinc-300">
+          <Text size="sm" className="text-cream">
             {config.hint}
           </Text>
         </VStack>
@@ -92,15 +92,15 @@ export function ScanView({
 
         <VStack className="px-5 pb-5 gap-3">
           {result ? (
-            <Card className="p-4 gap-2.5 bg-card">
-              <Text size="xs" bold className="text-muted-foreground uppercase">
+            <Card className="p-4 gap-2.5">
+              <Text size="xs" bold className="text-brown-500 uppercase">
                 Scanned ({result.type})
               </Text>
               <Text
                 size="xl"
                 bold
                 selectable
-                className="text-foreground"
+                className="text-brown-800"
                 style={{
                   fontFamily: Platform.select({
                     ios: 'Menlo',

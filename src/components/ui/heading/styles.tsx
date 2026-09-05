@@ -5,13 +5,14 @@ const baseStyle = isWeb
   : '';
 
 export const headingStyle = tva({
-  base: `text-foreground font-bold font-heading tracking-sm my-0 ${baseStyle}`,
+  // Nickainley has no bold weight — font-bold falls back to system black on RN.
+  base: `text-coral font-heading font-normal tracking-sm my-0 ${baseStyle}`,
   variants: {
     isTruncated: {
       true: 'truncate',
     },
     bold: {
-      true: 'font-bold',
+      true: 'font-normal',
     },
     underline: {
       true: 'underline',

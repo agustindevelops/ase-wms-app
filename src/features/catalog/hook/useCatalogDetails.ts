@@ -30,6 +30,7 @@ export function useCatalogDetails({
   const [categories, setCategories] = useState<ItemCategory[]>([]);
   const [materials, setMaterials] = useState<ItemMaterialOption[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +69,34 @@ export function useCatalogDetails({
       setError(apiErrorMessage(cause));
     }
   }, []);
+
+  const load = useCallback(
+    async (refresh = false) => {
+      if (refresh) {
+        setRefreshing(true);
+      } else {
+        setLoadingCategories(true);
+      }
+      setError(null);
+      try {
+        const [nextCategories, nextMaterials] = await Promise.all([
+          fetchItemCategories(),
+          fetchItemMaterials(),
+        ]);
+        setCategories(nextCategories);
+        setMaterials(nextMaterials);
+        if (itemId) {
+          await loadItem(itemId);
+        }
+      } catch (cause) {
+        setError(apiErrorMessage(cause));
+      } finally {
+        setLoadingCategories(false);
+        setRefreshing(false);
+      }
+    },
+    [itemId, loadItem],
+  );
 
   const submit = useCallback(async (): Promise<CatalogItem | null> => {
     const trimmedName = name.trim();
@@ -120,6 +149,7 @@ export function useCatalogDetails({
     categories,
     materials,
     loadingCategories,
+    refreshing,
     busy,
     error,
     setItemId,
@@ -127,6 +157,7 @@ export function useCatalogDetails({
     setQuantityText,
     setCategoryId,
     setMaterial,
+    load,
     loadCategories,
     loadItem,
     submit,

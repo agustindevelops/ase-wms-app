@@ -59,6 +59,7 @@ export type CatalogItem = {
   files: Array<{
     id: string;
     publicUrl: string | null;
+    readUrl?: string | null;
     status: string;
     sortOrder: number;
     contentType: string;
@@ -220,6 +221,13 @@ export async function unbindItemLocation(
     `/warehouse/${warehouseId}/item/${itemId}/location`,
   );
   return data.item;
+}
+
+export function itemPhotoUrl(item: CatalogItem): string | null {
+  const file = [...item.files]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .find((entry) => entry.publicUrl || entry.readUrl);
+  return file?.publicUrl ?? file?.readUrl ?? null;
 }
 
 export function itemQrPayload(item: CatalogItem): string | null {

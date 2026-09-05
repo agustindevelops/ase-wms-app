@@ -1,7 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '@/navigation/types';
-import { remainingForMode } from './hook/useOrderDetail';
 import { useOrderIssue } from './hook/useOrderIssue';
 import { OrderIssueView } from './ui/OrderIssueView';
 
@@ -28,16 +27,16 @@ export function OrderIssue() {
         const order = await issue.submit();
         if (!order) return;
         const leftover = order.lines.reduce(
-          (sum, line) => sum + remainingForMode(line, 'return'),
+          (sum, line) => sum + line.qtyOutstanding,
           0,
         );
         if (leftover === 0) {
-          navigation.popTo('OrderList', { mode: 'return' });
+          navigation.popTo('OrderList', { mode: params.mode });
           return;
         }
         navigation.popTo('OrderDetail', {
           orderId: params.orderId,
-          mode: 'return',
+          mode: params.mode,
         });
       }}
     />

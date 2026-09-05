@@ -3,7 +3,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { endSession } from '@/auth/session';
-import { aseWmsApiUrl } from '@/config/env';
+import { aseWisApiUrl } from '@/config/env';
 import { getFirebaseAuth } from '@/firebase/config';
 
 /** Rejected before the request leaves the device when there is no user. */
@@ -19,7 +19,7 @@ type RetriableConfig = InternalAxiosRequestConfig & {
 };
 
 export const api = axios.create({
-  baseURL: aseWmsApiUrl,
+  baseURL: aseWisApiUrl,
   timeout: 15_000,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -29,9 +29,9 @@ export const api = axios.create({
  * transparently when it is close to expiring, so nothing is stored here.
  */
 api.interceptors.request.use(async (config) => {
-  if (!aseWmsApiUrl) {
+  if (!aseWisApiUrl) {
     throw new Error(
-      'EXPO_PUBLIC_ASE_WMS_API_URL is not set. Add it to .env (no trailing slash).',
+      'EXPO_PUBLIC_ASE_WIS_API_URL is not set. Add it to .env (no trailing slash).',
     );
   }
 

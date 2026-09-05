@@ -137,7 +137,7 @@ export async function reportReturnIssue(
   },
 ): Promise<FulfillmentOrder> {
   const { data } = await api.post<{ order: FulfillmentOrder }>(
-    `/order/return/${orderId}/issue`,
+    `/order/${orderId}/issue`,
     body,
   );
   return data.order;

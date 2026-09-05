@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { fetchCatalogItem } from '@/api/catalog';
 import { apiErrorMessage } from '@/api/client';
 import {
   deleteImageUpload,
@@ -13,6 +14,11 @@ type ContentType = 'image/jpeg' | 'image/png' | 'image/webp';
 export type CatalogPhotoEntry = {
   fileId: string;
   previewUri: string;
+  existing?: boolean;
+};
+
+type Args = {
+  itemId?: string | null;
 };
 
 function mimeFromUri(uri: string, fallback: string | undefined): ContentType {
@@ -56,11 +62,47 @@ async function uploadAsset(asset: ImagePicker.ImagePickerAsset): Promise<{
   return { fileId: verified.file.id, previewUri: asset.uri };
 }
 
-export function useCatalogPhoto() {
+export function useCatalogPhoto({ itemId }: Args = {}) {
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(Boolean(itemId));
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<CatalogPhotoEntry[]>([]);
+
+  useEffect(() => {
+    if (!itemId) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const item = await fetchCatalogItem(itemId);
+        if (cancelled) return;
+        const seeded = [...item.files]
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((file) => ({
+            fileId: file.id,
+            previewUri: file.readUrl ?? file.publicUrl ?? '',
+            existing: true,
+          }));
+        setPhotos(seeded);
+      } catch (cause) {
+        if (!cancelled) {
+          setError(apiErrorMessage(cause));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [itemId]);
 
   const runWithAsset = useCallback(async (asset: ImagePicker.ImagePickerAsset) => {
     setBusy(true);
@@ -114,11 +156,14 @@ export function useCatalogPhoto() {
   }, [runWithAsset]);
 
   const removePhoto = useCallback(async (fileId: string) => {
+    const target = photos.find((photo) => photo.fileId === fileId);
     setBusy(true);
     setError(null);
     setStatus('Removing photo…');
     try {
-      await deleteImageUpload(fileId);
+      if (!target?.existing) {
+        await deleteImageUpload(fileId);
+      }
       setPhotos((current) => current.filter((photo) => photo.fileId !== fileId));
       setStatus('Photo removed.');
     } catch (cause) {
@@ -129,10 +174,12 @@ export function useCatalogPhoto() {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [photos]);
 
   return {
     busy,
+    loading,
+    editing: Boolean(itemId),
     status,
     error,
     photos,

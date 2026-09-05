@@ -36,7 +36,7 @@ export function WarehouseFormView({
                 Update this warehouse.
               </Text>
 
-              <Text size="sm" bold className="text-brown-900">
+              <Text size="sm" bold className="text-brown-800">
                 Name
               </Text>
               <Input>

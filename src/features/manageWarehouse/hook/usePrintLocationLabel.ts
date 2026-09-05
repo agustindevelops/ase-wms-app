@@ -34,11 +34,16 @@ export function usePrintLocationLabel({ warehouseId, locationUnitId }: Args) {
   const [qrPayload, setQrPayload] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [ensuring, setEnsuring] = useState(false);
   const [sharing, setSharing] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (refresh = false) => {
+    if (refresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
     try {
       const detail = await fetchLocationUnit(warehouseId, locationUnitId);
@@ -51,6 +56,7 @@ export function usePrintLocationLabel({ warehouseId, locationUnitId }: Args) {
       setError(apiErrorMessage(cause));
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [locationUnitId, warehouseId]);
 
@@ -124,6 +130,7 @@ export function usePrintLocationLabel({ warehouseId, locationUnitId }: Args) {
     qrPayload,
     error,
     loading,
+    refreshing,
     ensuring,
     sharing,
     printerBusy: print.busy,

@@ -10,7 +10,7 @@ export const useToast = createToastHook(View);
 type ToastAction = 'error' | 'success';
 
 const toastClassName: Record<ToastAction, string> = {
-  error: 'bg-coral',
+  error: 'bg-peach-500',
   success: 'bg-green-500',
 };
 

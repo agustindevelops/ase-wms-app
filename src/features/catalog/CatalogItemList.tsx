@@ -37,6 +37,23 @@ export function CatalogItemList() {
   };
 
   const onSelect = (item: CatalogItem) => {
+    if (params.mode === 'edit') {
+      navigation.navigate('CatalogPhoto', {
+        warehouseId: params.warehouseId,
+        itemId: item.id,
+      });
+      return;
+    }
+    if (params.mode === 'label') {
+      navigation.navigate('CatalogPrintQr', {
+        warehouseId: params.warehouseId,
+        itemId: item.id,
+        itemName: item.name,
+        qrCodeId: item.qrCodeId,
+        offerLocation: !item.locationUnitId,
+      });
+      return;
+    }
     if (params.mode === 'remove') {
       list.confirmRemove(item, () =>
         navigation.popTo('CatalogMenu', {
@@ -51,18 +68,21 @@ export function CatalogItemList() {
   return (
     <CatalogItemListView
       mode={params.mode}
+      query={list.query}
+      setQuery={list.setQuery}
       items={list.items}
       loading={list.loading}
       refreshing={list.refreshing}
       busyId={list.busyId}
       error={list.error}
       load={list.load}
+      onBack={() => navigation.goBack()}
       onScanItem={
-        params.mode === 'add'
+        params.mode === 'add' || params.mode === 'label'
           ? undefined
           : () => {
               const mode = params.mode;
-              if (mode === 'add') return;
+              if (mode === 'add' || mode === 'label') return;
               navigation.navigate('CatalogScanItem', {
                 warehouseId: params.warehouseId,
                 mode,

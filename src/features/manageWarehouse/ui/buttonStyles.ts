@@ -1,5 +1,5 @@
 /**
- * Disconnected-only. Peach reads as "this still needs a printer."
+ * Disconnected-only. Peach is reserved for setup-needed / attention actions.
  * Connected print actions use the built-in secondary / outline variants.
  */
 export const CONNECT_PRINTER_CLASS =

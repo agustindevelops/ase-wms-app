@@ -7,7 +7,7 @@ import { useScan } from '@/features/scan/hook/useScan';
 /** QR_CODE_TYPE.code for items. */
 const QR_TYPE_ITEM = 0;
 
-export type CatalogScanItemMode = 'move' | 'remove';
+export type CatalogScanItemMode = 'move' | 'remove' | 'edit';
 
 type Args = {
   warehouseId: string;
@@ -38,7 +38,7 @@ export function useCatalogScanItem({ warehouseId, mode, onItem }: Args) {
         }
 
         const located = Boolean(resolved.item.locationUnitId);
-        if (!located) {
+        if (mode !== 'edit' && !located) {
           throw new Error(
             mode === 'move'
               ? 'This item has no location yet. Use Add item to warehouse.'

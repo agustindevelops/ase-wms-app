@@ -16,7 +16,10 @@ type Navigation = NativeStackScreenProps<
 export function ReportIssueForm() {
   const { params } = useRoute<Route>();
   const navigation = useNavigation<Navigation>();
-  const form = useReportIssueForm({ itemId: params.itemId });
+  const form = useReportIssueForm({
+    itemId: params.itemId,
+    warehouseId: params.warehouseId,
+  });
 
   return (
     <ReportIssueFormView
@@ -25,7 +28,7 @@ export function ReportIssueForm() {
       onSubmit={async () => {
         const ok = await form.submit();
         if (!ok) return;
-        navigation.popTo('MainMenu');
+        navigation.navigate('MainTabs', { screen: 'Dashboard' });
       }}
     />
   );

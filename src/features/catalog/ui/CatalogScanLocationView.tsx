@@ -26,6 +26,7 @@ export type CatalogScanLocationViewProps = {
   error: string | null;
   itemName: string;
   onClose: () => void;
+  onSkip?: () => void;
 };
 
 export function CatalogScanLocationView({
@@ -39,11 +40,12 @@ export function CatalogScanLocationView({
   error,
   itemName,
   onClose,
+  onSkip,
 }: CatalogScanLocationViewProps) {
   if (!permission) {
     return (
       <SafeAreaView className="flex-1 bg-cream justify-center p-6">
-        <Text size="md" className="text-muted-foreground">
+        <Text size="md" className="text-brown-500">
           Checking camera permission…
         </Text>
       </SafeAreaView>
@@ -55,7 +57,7 @@ export function CatalogScanLocationView({
       <SafeAreaView className="flex-1 bg-cream justify-center p-6">
         <StatusBar style="dark" />
         <VStack className="gap-3.5">
-          <Heading size="xl" className="text-brown-900">
+          <Heading size="xl">
             {config.title}
           </Heading>
           <Text size="md" className="text-brown-500 leading-6">
@@ -67,6 +69,11 @@ export function CatalogScanLocationView({
           <Button variant="secondary" onPress={onClose}>
             <ButtonText>Back</ButtonText>
           </Button>
+          {onSkip ? (
+            <Button variant="outline" onPress={onSkip}>
+              <ButtonText>Skip adding to location</ButtonText>
+            </Button>
+          ) : null}
         </VStack>
       </SafeAreaView>
     );
@@ -87,7 +94,7 @@ export function CatalogScanLocationView({
           <Heading size="xl" className="text-white">
             {config.title}
           </Heading>
-          <Text size="sm" className="text-zinc-300">
+          <Text size="sm" className="text-cream">
             {config.hint}
           </Text>
         </VStack>
@@ -96,7 +103,7 @@ export function CatalogScanLocationView({
 
         <VStack className="px-5 pb-5 gap-3">
           {error ? (
-            <Card className="p-4 gap-2.5 bg-card">
+            <Card className="p-4 gap-2.5">
               <Text size="sm" bold className="text-destructive">
                 {error}
               </Text>
@@ -107,23 +114,23 @@ export function CatalogScanLocationView({
           ) : null}
 
           {binding || result ? (
-            <Card className="p-4 gap-2.5 bg-card">
+            <Card className="p-4 gap-2.5">
               {binding ? (
                 <VStack className="items-center gap-2">
                   <Spinner color="#7e9570" />
-                  <Text size="sm" className="text-muted-foreground">
+                  <Text size="sm" className="text-brown-500">
                     Working…
                   </Text>
                 </VStack>
               ) : result ? (
                 <>
-                  <Text size="xs" bold className="text-muted-foreground uppercase">
+                  <Text size="xs" bold className="text-brown-500 uppercase">
                     Scanned
                   </Text>
                   <Text
                     size="sm"
                     selectable
-                    className="text-foreground"
+                    className="text-brown-800"
                     style={{
                       fontFamily: Platform.select({
                         ios: 'Menlo',
@@ -137,13 +144,27 @@ export function CatalogScanLocationView({
               ) : null}
             </Card>
           ) : (
-            <Button
-              className="bg-white/20 data-[hover=true]:bg-white/30"
-              onPress={onClose}
-              disabled={binding}
-            >
-              <ButtonText className="text-white">Cancel</ButtonText>
-            </Button>
+            <VStack className="gap-2">
+              {onSkip ? (
+                <Button
+                  variant="outline"
+                  className="bg-white/20 data-[hover=true]:bg-white/30"
+                  onPress={onSkip}
+                  disabled={binding}
+                >
+                  <ButtonText className="text-white">
+                    Skip adding to location
+                  </ButtonText>
+                </Button>
+              ) : null}
+              <Button
+                className="bg-white/20 data-[hover=true]:bg-white/30"
+                onPress={onClose}
+                disabled={binding}
+              >
+                <ButtonText className="text-white">Cancel</ButtonText>
+              </Button>
+            </VStack>
           )}
         </VStack>
       </SafeAreaView>

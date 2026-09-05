@@ -1,15 +1,15 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { MainStackParamList } from '@/navigation/types';
+import type { CatalogStackParamList } from '@/navigation/types';
 import { useCatalogPrintQr } from './hook/useCatalogPrintQr';
 import { CatalogPrintQrView } from './ui/CatalogPrintQrView';
 
 type Route = NativeStackScreenProps<
-  MainStackParamList,
+  CatalogStackParamList,
   'CatalogPrintQr'
 >['route'];
 type Navigation = NativeStackScreenProps<
-  MainStackParamList,
+  CatalogStackParamList,
   'CatalogPrintQr'
 >['navigation'];
 
@@ -23,23 +23,26 @@ export function CatalogPrintQr() {
     initialQrCodeId: params.qrCodeId,
   });
 
+  const goNext = (printed: boolean) => {
+    if (params.offerLocation === false) {
+      navigation.popTo('CatalogMenu', {
+        warehouseId: params.warehouseId,
+      });
+      return;
+    }
+    navigation.navigate('CatalogPlaceItem', {
+      warehouseId: params.warehouseId,
+      itemId: params.itemId,
+      itemName: params.itemName,
+      printed,
+    });
+  };
+
   return (
     <CatalogPrintQrView
       {...printQr}
-      onContinue={() => {
-        navigation.navigate('CatalogGlue', {
-          warehouseId: params.warehouseId,
-          itemId: params.itemId,
-          itemName: params.itemName,
-        });
-      }}
-      onSkip={() => {
-        navigation.navigate('CatalogScanLocation', {
-          warehouseId: params.warehouseId,
-          itemId: params.itemId,
-          itemName: params.itemName,
-        });
-      }}
+      onPrinted={() => goNext(true)}
+      onSkip={() => goNext(false)}
     />
   );
 }

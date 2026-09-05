@@ -1,9 +1,8 @@
-import { Platform, ScrollView } from 'react-native';
+import { ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { HStack } from '@/components/ui/hstack';
 import { SafeAreaView } from '@/components/ui/safe-area-view';
 import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
@@ -13,7 +12,7 @@ import { CONNECT_PRINTER_CLASS } from '@/features/manageWarehouse/ui/buttonStyle
 import type { UseCatalogPrintQrResult } from '../hook/useCatalogPrintQr';
 
 export type CatalogPrintQrViewProps = UseCatalogPrintQrResult & {
-  onContinue: () => void;
+  onPrinted: () => void;
   onSkip: () => void;
 };
 
@@ -23,37 +22,41 @@ export function CatalogPrintQrView({
   error,
   ensuring,
   replacing,
-  sharing,
+  showPrinterSetup,
   printerBusy,
   printerMessage,
   deviceName,
   printerSummary,
-  ensureQr,
-  replaceQr,
-  shareLabel,
   connectPrinter,
   printLabel,
-  onContinue,
+  replaceQr,
+  onPrinted,
   onSkip,
 }: CatalogPrintQrViewProps) {
-  const busy = ensuring || replacing || sharing || printerBusy;
+  const busy = ensuring || replacing || printerBusy;
+  const hasQr = Boolean(qrPayload);
+
+  const onPrint = async () => {
+    const ok = await printLabel();
+    if (ok) onPrinted();
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-cream" edges={['bottom', 'left', 'right']}>
       <StatusBar style="dark" />
       <ScrollView className="flex-1">
         <VStack className="px-6 pt-4 pb-8 gap-3.5">
-          <HStack className="items-start gap-3">
-            <VStack className="flex-1 min-w-0 gap-1">
-              <Text size="sm" className="text-brown-500">
-                {itemName}
-              </Text>
-              <Text size="sm" className="text-brown-500">
-                Create and print an item QR (type 0), then glue it to the item.
-              </Text>
-            </VStack>
-            {qrPayload ? <QrPreview value={qrPayload} size={72} /> : null}
-          </HStack>
+          <Text size="sm" className="text-brown-500">
+            {hasQr
+              ? `${itemName} already has a QR. Print the same code, or replace it and print a new label.`
+              : `${itemName} is saved. Print a label now, or skip and print later.`}
+          </Text>
+
+          {hasQr ? (
+            <Box className="self-start">
+              <QrPreview value={qrPayload!} size={88} />
+            </Box>
+          ) : null}
 
           {error ? (
             <Text size="sm" bold className="text-destructive">
@@ -61,36 +64,38 @@ export function CatalogPrintQrView({
             </Text>
           ) : null}
 
-          <Card className="p-4 gap-2 border border-border bg-card">
-            <Text size="xs" bold className="text-muted-foreground uppercase">
-              QR payload
-            </Text>
-            <Text
-              size="sm"
-              className="text-foreground"
-              style={{
-                fontFamily: Platform.select({
-                  ios: 'Menlo',
-                  android: 'monospace',
-                }),
-              }}
-            >
-              {qrPayload ?? 'Not created yet'}
-            </Text>
-            <Text size="sm" className="text-muted-foreground leading-5">
-              {deviceName
-                ? `Print to ${deviceName}`
-                : 'Connect a D110 to print, or share the payload.'}
-            </Text>
-            {printerSummary ? (
-              <Text size="sm" className="text-muted-foreground">
-                {printerSummary}
+          {showPrinterSetup || deviceName ? (
+            <Card className="p-4 gap-2">
+              <Text size="xs" bold className="text-brown-500 uppercase">
+                Printer
               </Text>
-            ) : null}
-            <Text size="sm" className="text-muted-foreground leading-5">
-              {printerMessage}
-            </Text>
-          </Card>
+              <Text size="sm" className="text-brown-800">
+                {deviceName
+                  ? `Connected to ${deviceName}`
+                  : 'A D110 printer is required to create a label.'}
+              </Text>
+              {printerSummary ? (
+                <Text size="sm" className="text-brown-500">
+                  {printerSummary}
+                </Text>
+              ) : null}
+              {printerMessage ? (
+                <Text size="sm" className="text-brown-500 leading-5">
+                  {printerMessage}
+                </Text>
+              ) : null}
+              {!deviceName ? (
+                <Button
+                  className={`mt-1 ${CONNECT_PRINTER_CLASS}`}
+                  onPress={() => void connectPrinter()}
+                  disabled={busy}
+                >
+                  {printerBusy ? <ButtonSpinner /> : null}
+                  <ButtonText>Connect printer</ButtonText>
+                </Button>
+              ) : null}
+            </Card>
+          ) : null}
 
           {busy ? (
             <Box className="items-center py-2">
@@ -98,62 +103,26 @@ export function CatalogPrintQrView({
             </Box>
           ) : null}
 
-          {!qrPayload ? (
-            <Button onPress={() => void ensureQr()} disabled={busy}>
-              {ensuring ? <ButtonSpinner /> : null}
-              <ButtonText>Create QR code</ButtonText>
-            </Button>
-          ) : null}
-
           <Button
-            variant={deviceName ? 'outline' : 'default'}
-            className={deviceName ? undefined : CONNECT_PRINTER_CLASS}
-            onPress={() => void connectPrinter()}
+            className="mt-2"
+            onPress={() => void onPrint()}
             disabled={busy}
           >
+            {printerBusy ? <ButtonSpinner /> : null}
             <ButtonText>
-              {deviceName ? 'Reconnect printer' : 'Connect printer'}
+              {deviceName ? `Print to ${deviceName}` : 'Print label'}
             </ButtonText>
           </Button>
-
-          {deviceName ? (
+          {hasQr ? (
             <Button
-              variant="secondary"
-              onPress={() => void printLabel()}
-              disabled={busy}
-            >
-              {printerBusy ? <ButtonSpinner /> : null}
-              <ButtonText>{`Print to ${deviceName}`}</ButtonText>
-            </Button>
-          ) : null}
-
-          <Button
-            variant="outline"
-            onPress={() => void shareLabel()}
-            disabled={busy}
-          >
-            {sharing ? <ButtonSpinner /> : null}
-            <ButtonText>Share label</ButtonText>
-          </Button>
-
-          {qrPayload ? (
-            <Button
-              variant="outline"
-              onPress={() => void replaceQr()}
+              variant="destructive"
+              onPress={replaceQr}
               disabled={busy}
             >
               {replacing ? <ButtonSpinner /> : null}
-              <ButtonText>Replace QR</ButtonText>
+              <ButtonText>Replace QR code</ButtonText>
             </Button>
           ) : null}
-
-          <Button
-            className="mt-2"
-            onPress={onContinue}
-            disabled={busy || !qrPayload}
-          >
-            <ButtonText>I printed the label</ButtonText>
-          </Button>
           <Button variant="outline" onPress={onSkip} disabled={busy}>
             <ButtonText>Skip printing</ButtonText>
           </Button>

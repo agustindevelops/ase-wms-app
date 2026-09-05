@@ -50,7 +50,8 @@ export function OrderDetail() {
           orderId: params.orderId,
           itemId: line.itemId,
           itemName: line.item.name,
-          remaining: remainingForMode(line, params.mode),
+          remaining: line.qtyOutstanding,
+          mode: params.mode,
         })
       }
     />

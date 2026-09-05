@@ -59,6 +59,7 @@ export function CatalogDetails() {
           itemId: item.id,
           itemName: item.name,
           qrCodeId: item.qrCodeId,
+          offerLocation: !item.locationUnitId,
         });
       }}
     />

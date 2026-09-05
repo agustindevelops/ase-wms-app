@@ -9,26 +9,26 @@
   :root {
     @variant light {
       --color-background: #fffcf9;
-      --color-foreground: #473b33;
+      --color-foreground: #5e5045;
       --color-card: #ffffff;
-      --color-card-foreground: #473b33;
+      --color-card-foreground: #5e5045;
       --color-popover: #ffffff;
-      --color-popover-foreground: #473b33;
+      --color-popover-foreground: #5e5045;
       --color-primary: #7e9570;
       --color-primary-foreground: #ffffff;
       --color-secondary: #f0eae4;
-      --color-secondary-foreground: #473b33;
+      --color-secondary-foreground: #5e5045;
       --color-muted: #f9f7f4;
       --color-muted-foreground: #a89583;
-      --color-accent: #ff785e;
+      --color-accent: #ce6b69;
       --color-accent-foreground: #ffffff;
-      --color-destructive: #ce6b69;
+      --color-destructive: #ff785e;
       --color-destructive-foreground: #ffffff;
       --color-border: #e2d6c7;
       --color-input: #e2d6c7;
       --color-ring: #7e9570;
 
-      /* Brand scale utilities: bg-cream, text-brown-500, bg-peach-500, bg-green-700 */
+      /* Brand: coral = titles; peach = errors / attention; green = primary actions */
       --color-cream: #fffcf9;
       --color-brown-50: #f9f7f4;
       --color-brown-100: #f0eae4;
@@ -76,9 +76,9 @@
       --color-secondary-foreground: #fffcf9;
       --color-muted: #3a322c;
       --color-muted-foreground: #c0aa91;
-      --color-accent: #ff9278;
+      --color-accent: #ce6b69;
       --color-accent-foreground: #1a1f16;
-      --color-destructive: #ce6b69;
+      --color-destructive: #ff785e;
       --color-destructive-foreground: #ffffff;
       --color-border: #5e5045;
       --color-input: #5e5045;

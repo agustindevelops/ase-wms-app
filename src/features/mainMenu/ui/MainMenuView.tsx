@@ -34,7 +34,7 @@ export function MainMenuView({
     <SafeAreaView className="flex-1 bg-cream">
       <StatusBar style="dark" />
       <VStack className="flex-1 px-6 pt-12 gap-3.5">
-        <Heading size="2xl" className="text-brown-900">
+        <Heading size="2xl">
           Main Menu
         </Heading>
         {me ? (
@@ -76,12 +76,12 @@ export function MainMenuView({
         <Button onPress={onReturn} disabled={blocked}>
           <ButtonText>Return Order</ButtonText>
         </Button>
-        <Button onPress={onReportIssue} disabled={blocked}>
+        <Button variant="destructive" onPress={onReportIssue} disabled={blocked}>
           <ButtonText>Report Issue</ButtonText>
         </Button>
 
         <Button
-          variant="outline"
+          variant="destructive"
           className="mt-auto mb-4"
           onPress={() => void handleSignOut()}
           disabled={busy || signingOut}

@@ -13,7 +13,7 @@ type Navigation = NativeStackScreenProps<
 export function CatalogPhoto() {
   const { params } = useRoute<Route>();
   const navigation = useNavigation<Navigation>();
-  const photo = useCatalogPhoto();
+  const photo = useCatalogPhoto({ itemId: params.itemId });
 
   return (
     <CatalogPhotoView

@@ -46,6 +46,11 @@ export function CatalogScanLocation() {
       error={scan.error}
       itemName={params.itemName}
       onClose={() => navigation.goBack()}
+      onSkip={() => {
+        navigation.popTo('CatalogMenu', {
+          warehouseId: params.warehouseId,
+        });
+      }}
     />
   );
 }

@@ -38,7 +38,7 @@ export function OrderIssueView({
               {itemName} · {remaining} outstanding. Owned quantity is reduced; available is not restored.
             </Text>
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Type
             </Text>
             <Pressable
@@ -47,10 +47,10 @@ export function OrderIssueView({
               className={`rounded-lg border px-3 py-2.5 ${
                 type === 'MISSING'
                   ? 'border-green-700 bg-green-700/15'
-                  : 'border-border bg-card'
+                  : 'border-brown-200 bg-white/70'
               }`}
             >
-              <Text size="sm" className="text-brown-900">
+              <Text size="sm" className="text-brown-800">
                 Missing
               </Text>
             </Pressable>
@@ -60,15 +60,15 @@ export function OrderIssueView({
               className={`rounded-lg border px-3 py-2.5 ${
                 type === 'BROKEN'
                   ? 'border-green-700 bg-green-700/15'
-                  : 'border-border bg-card'
+                  : 'border-brown-200 bg-white/70'
               }`}
             >
-              <Text size="sm" className="text-brown-900">
+              <Text size="sm" className="text-brown-800">
                 Broken
               </Text>
             </Pressable>
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Quantity
             </Text>
             <Input>
@@ -80,7 +80,7 @@ export function OrderIssueView({
               />
             </Input>
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Notes (optional)
             </Text>
             <Input>
@@ -98,7 +98,11 @@ export function OrderIssueView({
               </Text>
             ) : null}
 
-            <Button onPress={() => void onSubmit()} disabled={busy}>
+            <Button
+              variant="destructive"
+              onPress={() => void onSubmit()}
+              disabled={busy}
+            >
               {busy ? <ButtonSpinner /> : null}
               <ButtonText>Record issue</ButtonText>
             </Button>

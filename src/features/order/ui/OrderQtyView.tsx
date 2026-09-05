@@ -45,14 +45,14 @@ export function OrderQtyView({
                 : `${remaining} outstanding to return.`}
             </Text>
             {mode === 'return' ? (
-              <Text size="sm" bold className="text-brown-900">
+              <Text size="sm" bold className="text-brown-800">
                 {returnTo
                   ? `Return this item to ${returnTo}.`
                   : 'This item has no assigned location. After quantity, scan a warehouse location QR to store it.'}
               </Text>
             ) : null}
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Quantity
             </Text>
             <Input>

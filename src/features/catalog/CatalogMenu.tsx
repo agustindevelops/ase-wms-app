@@ -17,6 +17,12 @@ export function CatalogMenu() {
   return (
     <CatalogMenuView
       onCreate={() => navigation.navigate('CatalogPhoto', { warehouseId })}
+      onEdit={() =>
+        navigation.navigate('CatalogItemList', { warehouseId, mode: 'edit' })
+      }
+      onLabel={() =>
+        navigation.navigate('CatalogItemList', { warehouseId, mode: 'label' })
+      }
       onAdd={() =>
         navigation.navigate('CatalogItemList', { warehouseId, mode: 'add' })
       }

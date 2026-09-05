@@ -1,12 +1,55 @@
-export type MainStackParamList = {
-  MainMenu: undefined;
+export type CatalogStackParamList = {
+  CatalogMenu: { warehouseId: string };
+  CatalogPhoto: {
+    warehouseId: string;
+    itemId?: string;
+  };
+  CatalogItemList: {
+    warehouseId: string;
+    mode: 'add' | 'move' | 'remove' | 'label' | 'edit';
+  };
+  CatalogScanItem: {
+    warehouseId: string;
+    mode: 'move' | 'remove' | 'edit';
+  };
+  CatalogDetails: {
+    warehouseId: string;
+    photoFileIds: string[];
+    itemId?: string;
+  };
+  CatalogPrintQr: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+    qrCodeId?: string | null;
+    offerLocation?: boolean;
+  };
+  CatalogPlaceItem: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+    printed: boolean;
+  };
+  CatalogGlue: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+  };
+  CatalogScanLocation: {
+    warehouseId: string;
+    itemId: string;
+    itemName: string;
+    doneTarget?: 'hub' | 'main';
+  };
+};
+
+export type WarehouseStackParamList = {
   WarehouseLevel: {
     warehouseId: string;
     warehouseName: string;
     level: number;
     parentLocationUnitId?: string;
     parentName?: string;
-    /** Names above the current unit: warehouse, then each drilled parent. */
     ancestorNames: string[];
   };
   WarehouseForm: {
@@ -32,45 +75,9 @@ export type MainStackParamList = {
     locationUnitId: string;
     locationName: string;
   };
-  CatalogMenu: {
-    warehouseId: string;
-  };
-  CatalogPhoto: {
-    warehouseId: string;
-    /** Set after the first save so going back to photos still updates. */
-    itemId?: string;
-  };
-  CatalogItemList: {
-    warehouseId: string;
-    mode: 'add' | 'move' | 'remove';
-  };
-  CatalogScanItem: {
-    warehouseId: string;
-    mode: 'move' | 'remove';
-  };
-  CatalogDetails: {
-    warehouseId: string;
-    photoFileIds: string[];
-    itemId?: string;
-  };
-  CatalogPrintQr: {
-    warehouseId: string;
-    itemId: string;
-    itemName: string;
-    qrCodeId?: string | null;
-  };
-  CatalogGlue: {
-    warehouseId: string;
-    itemId: string;
-    itemName: string;
-  };
-  CatalogScanLocation: {
-    warehouseId: string;
-    itemId: string;
-    itemName: string;
-    /** Create finishes on Main Menu; add/move return to the Catalog hub. */
-    doneTarget?: 'hub' | 'main';
-  };
+};
+
+export type OrderStackParamList = {
   OrderList: {
     mode: 'pickup' | 'return';
   };
@@ -102,16 +109,34 @@ export type MainStackParamList = {
     itemId: string;
     itemName: string;
     remaining: number;
+    mode: 'pickup' | 'return';
   };
-  ReportIssueFind: {
-    warehouseId: string;
-  };
-  ReportIssueScan: {
-    warehouseId: string;
-  };
+};
+
+export type MainTabParamList = {
+  Dashboard: undefined;
+  CatalogTab: undefined;
+  WarehouseTab: undefined;
+  PickupTab: undefined;
+  ReturnTab: undefined;
+};
+
+export type RootMainParamList = {
+  MainTabs: { screen?: keyof MainTabParamList } | undefined;
+  ActivityList: { day?: string };
+  ReportIssueFind: { warehouseId: string };
+  ReportIssueScan: { warehouseId: string };
   ReportIssueForm: {
     warehouseId: string;
     itemId: string;
     itemName: string;
   };
 };
+
+/** @deprecated Prefer nested stack param lists; kept for gradual migration. */
+export type MainStackParamList = CatalogStackParamList &
+  WarehouseStackParamList &
+  OrderStackParamList &
+  RootMainParamList & {
+    MainMenu: undefined;
+  };

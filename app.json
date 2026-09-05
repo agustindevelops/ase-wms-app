@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ase-wms-app",
-    "slug": "ase-wms-app",
+    "name": "WIS",
+    "slug": "ase-wis-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -65,7 +65,8 @@
           "photosPermission": "App needs photo library access to upload inventory images"
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-font"
     ],
     "extra": {
       "eas": {

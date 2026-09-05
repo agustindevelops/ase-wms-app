@@ -1,12 +1,17 @@
-import { RefreshControl, ScrollView } from 'react-native';
+import { Pressable, RefreshControl, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import type { FulfillmentOrder, OrderFulfillmentMode } from '@/api/order';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { HStack } from '@/components/ui/hstack';
 import { SafeAreaView } from '@/components/ui/safe-area-view';
 import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import {
+  canOpenFulfillment,
+  isFulfillmentComplete,
+} from '@/lib/orderStatus';
 import { formatEventDate } from '../hook/useOrderList';
 import type { UseOrderListResult } from '../hook/useOrderList';
 
@@ -26,8 +31,14 @@ export function OrderListView({
 }: OrderListViewProps) {
   const hint =
     mode === 'pickup'
-      ? 'Orders ready to pick. Tap one to open the pull list.'
-      : 'Orders in teardown. Tap one to start returns.';
+      ? 'Orders scheduled for today. Green means pickup is done — open to review or report a problem.'
+      : 'Orders scheduled for today. Paid orders stay visible but cannot be opened until pickup is done.';
+
+  const sorted = [...orders].sort((a, b) => {
+    const aDone = isFulfillmentComplete(a, mode) ? 1 : 0;
+    const bDone = isFulfillmentComplete(b, mode) ? 1 : 0;
+    return aDone - bDone;
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-cream" edges={['bottom', 'left', 'right']}>
@@ -64,13 +75,13 @@ export function OrderListView({
             </VStack>
           ) : null}
 
-          {!loading && orders.length === 0 && !error ? (
+          {!loading && sorted.length === 0 && !error ? (
             <Text size="sm" className="text-brown-500">
-              No orders are eligible right now.
+              No orders scheduled for today.
             </Text>
           ) : null}
 
-          {orders.map((order) => {
+          {sorted.map((order) => {
             const remaining = order.lines.reduce(
               (sum, line) =>
                 sum +
@@ -78,29 +89,59 @@ export function OrderListView({
               0,
             );
             const date = formatEventDate(order.eventDate);
+            const completed = isFulfillmentComplete(order, mode);
+            const locked = !canOpenFulfillment(order, mode);
             return (
-              <Button
+              <Pressable
                 key={order.id}
-                variant="outline"
-                className="h-auto py-3 justify-start"
                 onPress={() => onSelect(order)}
+                disabled={locked}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: locked }}
+                accessibilityLabel={order.name}
+                className={`rounded-2xl border px-3 py-3 ${
+                  completed
+                    ? 'border-green-200 bg-green-50'
+                    : locked
+                      ? 'border-brown-200 bg-brown-50 opacity-70'
+                      : 'border-brown-200 bg-white/60'
+                }`}
               >
-                <VStack className="flex-1 items-start gap-0.5">
-                  <ButtonText className="text-left">{order.name}</ButtonText>
-                  <Text size="xs" className="text-brown-500">
-                    {[
-                      order.status.name,
-                      date,
-                      `${order.lines.length} lines`,
-                      mode === 'pickup'
-                        ? `${remaining} to pick`
-                        : `${remaining} outstanding`,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </Text>
-                </VStack>
-              </Button>
+                <HStack className="items-start gap-3">
+                  <VStack className="flex-1 items-start gap-0.5 min-w-0">
+                    <Text size="sm" bold className="text-brown-800">
+                      {completed ? `✓ ${order.name}` : order.name}
+                    </Text>
+                    <Text size="xs" className="text-brown-500">
+                      {[
+                        completed
+                          ? 'Completed'
+                          : locked
+                            ? 'Waiting for pickup'
+                            : order.status.name,
+                        date,
+                        `${order.lines.length} lines`,
+                        completed
+                          ? mode === 'pickup'
+                            ? 'Picked up'
+                            : 'Returned'
+                          : locked
+                            ? 'Not picked up yet'
+                            : mode === 'pickup'
+                              ? `${remaining} to pick`
+                              : `${remaining} outstanding`,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </Text>
+                  </VStack>
+                  {completed ? (
+                    <Text size="xs" bold className="text-green-700 pt-0.5">
+                      Done
+                    </Text>
+                  ) : null}
+                </HStack>
+              </Pressable>
             );
           })}
         </VStack>

@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '@/navigation/types';
+import { useAppToast } from '@/components/ui/toast';
+import { canOpenFulfillment } from '@/lib/orderStatus';
 import { useOrderList } from './hook/useOrderList';
 import { OrderListView } from './ui/OrderListView';
 
@@ -14,6 +16,7 @@ type Navigation = NativeStackScreenProps<
 export function OrderList() {
   const { params } = useRoute<Route>();
   const navigation = useNavigation<Navigation>();
+  const toast = useAppToast();
   const list = useOrderList({ mode: params.mode });
 
   useFocusEffect(
@@ -26,12 +29,16 @@ export function OrderList() {
     <OrderListView
       {...list}
       mode={params.mode}
-      onSelect={(order) =>
+      onSelect={(order) => {
+        if (!canOpenFulfillment(order, params.mode)) {
+          toast.error('Pickup this order first.');
+          return;
+        }
         navigation.navigate('OrderDetail', {
           orderId: order.id,
           mode: params.mode,
-        })
-      }
+        });
+      }}
     />
   );
 }

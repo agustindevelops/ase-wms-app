@@ -28,7 +28,7 @@ const buttonStyle = tva({
       default:
         'bg-green-500 data-[hover=true]:bg-green-700 data-[active=true]:bg-green-700',
       destructive:
-        'bg-coral data-[hover=true]:bg-coral-hover data-[active=true]:bg-coral-hover',
+        'bg-peach-500 data-[hover=true]:bg-peach-600 data-[active=true]:bg-peach-600',
       outline:
         'border border-brown-200 bg-cream data-[hover=true]:bg-brown-50 data-[active=true]:bg-brown-50',
       secondary:
@@ -46,14 +46,15 @@ const buttonStyle = tva({
 });
 const buttonTextStyle = tva({
   // Use palette utilities (not theme CSS vars) so labels stay visible on UniWind.
-  base: 'web:select-none font-sans text-base font-semibold text-white',
+  // Do not set text-white on the base: UniWind will not reliably override it for outline/secondary.
+  base: 'web:select-none font-inter-semibold text-base',
   parentVariants: {
     variant: {
       default: 'text-white',
       destructive: 'text-white',
-      outline: 'text-brown-900',
-      secondary: 'text-brown-900',
-      ghost: 'text-brown-900',
+      outline: 'text-brown-800',
+      secondary: 'text-brown-800',
+      ghost: 'text-brown-800',
       link: 'text-green-700',
     },
     size: {
@@ -84,10 +85,10 @@ const buttonIconStyle = tva({
       default: 'text-primary-foreground',
       destructive: 'text-white',
       outline:
-        'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
+        'text-brown-800 data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
       secondary: 'text-secondary-foreground',
       ghost:
-        'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
+        'text-brown-800 data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
       link: 'text-primary',
     },
     size: {

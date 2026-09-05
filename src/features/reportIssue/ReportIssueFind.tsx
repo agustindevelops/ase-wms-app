@@ -27,11 +27,8 @@ export function ReportIssueFind() {
   }, [find.load]);
 
   const goForm = (item: CatalogItem) => {
-    const available = Math.min(item.quantityOwned, item.quantityAvailable);
-    if (available <= 0) {
-      toast.error(
-        'No available quantity to report. Use Return Order if this item is out.',
-      );
+    if (item.quantityOwned <= 0) {
+      toast.error('No quantity to report.');
       return;
     }
     navigation.navigate('ReportIssueForm', {

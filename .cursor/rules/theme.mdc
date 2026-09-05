@@ -1,0 +1,32 @@
+---
+description: Brand color usage for titles, labels, errors, and attention actions
+globs: **/*.{tsx,ts,css}
+alwaysApply: true
+---
+
+# Color usage
+
+- **Coral `#CE6B69`** (`text-coral`, `bg-coral`): titles, headings, brand display type. Default `Heading` color.
+- **Peach `#FF785E`** (`text-peach-500`, `bg-peach-500`, `text-destructive`, `variant="destructive"`): attention only.
+- **Brown** (`text-brown-800`, `text-brown-500`): form labels, body, helper text. Never peach on labels.
+- **Green** (`bg-green-500`): primary / complete actions.
+
+## Peach is allowed only for
+
+- Errors and alerts (`text-destructive`, error toasts)
+- Report issue
+- Sign out
+- Connect printer (not yet connected)
+- Incomplete setup, missing config, or destructive existing-item actions (archive, remove)
+
+```tsx
+// ❌ BAD — title or label in peach
+<Heading className="text-peach-500">Catalog</Heading>
+<FormControlLabelText className="text-peach-500">Name</FormControlLabelText>
+
+// ✅ GOOD
+<Heading>Catalog</Heading>
+<FormControlLabelText>Name</FormControlLabelText>
+<Text className="text-destructive">{error}</Text>
+<Button variant="destructive"><ButtonText>Sign out</ButtonText></Button>
+```

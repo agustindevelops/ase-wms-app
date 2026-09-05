@@ -31,7 +31,7 @@ const formControlErrorTextStyle = tva({
       true: 'web:truncate',
     },
     bold: {
-      true: 'font-bold',
+      true: 'font-inter-bold',
     },
     underline: {
       true: 'underline',
@@ -56,13 +56,13 @@ const formControlHelperStyle = tva({
 });
 
 const formControlHelperTextStyle = tva({
-  base: 'text-foreground/70 font-body text-sm',
+  base: 'text-brown-500 font-body text-sm',
   variants: {
     isTruncated: {
       true: 'web:truncate',
     },
     bold: {
-      true: 'font-bold',
+      true: 'font-inter-bold',
     },
     underline: {
       true: 'underline',
@@ -87,13 +87,13 @@ const formControlLabelStyle = tva({
 });
 
 const formControlLabelTextStyle = tva({
-  base: 'font-medium text-foreground text-base font-body',
+  base: 'font-inter-medium text-brown-800 text-base',
   variants: {
     isTruncated: {
       true: 'web:truncate',
     },
     bold: {
-      true: 'font-bold',
+      true: 'font-inter-bold',
     },
     underline: {
       true: 'underline',
@@ -114,13 +114,13 @@ const formControlLabelTextStyle = tva({
 });
 
 const formControlLabelAstrickStyle = tva({
-  base: 'font-medium text-typography text-base',
+  base: 'font-inter-medium text-coral text-base',
   variants: {
     isTruncated: {
       true: 'web:truncate',
     },
     bold: {
-      true: 'font-bold',
+      true: 'font-inter-bold',
     },
     underline: {
       true: 'underline',

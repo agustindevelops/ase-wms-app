@@ -100,7 +100,7 @@ export function WarehouseLevelView({
         <VStack className="px-6 pt-4 pb-8 gap-3">
           <HStack className="items-start gap-3">
             <VStack className="flex-1 min-w-0 gap-1">
-              <Heading size="xl" className="text-brown-900">
+              <Heading size="xl">
                 {title}
               </Heading>
               {breadcrumb ? (
@@ -219,7 +219,7 @@ export function WarehouseLevelView({
             return (
               <HStack
                 key={unit.id}
-                className="items-center gap-2 rounded-xl border border-border bg-card px-2 py-2"
+                className="items-center gap-2 rounded-2xl border border-brown-200 bg-white/60 px-3 py-2.5"
               >
                 <OncePressable
                   onPress={() => onOpen(unit)}
@@ -238,7 +238,7 @@ export function WarehouseLevelView({
                       isTruncated
                       numberOfLines={1}
                       ellipsizeMode="tail"
-                      className="flex-1 min-w-0 text-brown-900"
+                      className="flex-1 min-w-0 text-brown-800"
                     >
                       {unit.name}
                     </Text>

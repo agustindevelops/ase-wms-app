@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { apiErrorMessage } from '@/api/client';
 import {
@@ -9,7 +9,7 @@ import {
 } from '@/api/catalog';
 import { useAppToast } from '@/components/ui/toast';
 
-export type CatalogItemListMode = 'add' | 'move' | 'remove';
+export type CatalogItemListMode = 'add' | 'move' | 'remove' | 'label' | 'edit';
 
 type Args = {
   warehouseId: string;
@@ -17,7 +17,9 @@ type Args = {
 };
 
 function locationFilter(mode: CatalogItemListMode): WarehouseItemLocationFilter {
-  return mode === 'add' ? 'none' : 'set';
+  if (mode === 'add') return 'none';
+  if (mode === 'label' || mode === 'edit') return 'all';
+  return 'set';
 }
 
 export function locationLabel(item: CatalogItem): string | null {
@@ -27,11 +29,23 @@ export function locationLabel(item: CatalogItem): string | null {
 
 export function useCatalogItemList({ warehouseId, mode }: Args) {
   const toast = useAppToast();
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedQuery((current) => {
+        const next = query.trim();
+        return current === next ? current : next;
+      });
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [query]);
 
   const load = useCallback(
     async (refresh = false) => {
@@ -42,7 +56,13 @@ export function useCatalogItemList({ warehouseId, mode }: Args) {
       }
       setError(null);
       try {
-        setItems(await fetchWarehouseItems(warehouseId, locationFilter(mode)));
+        setItems(
+          await fetchWarehouseItems(
+            warehouseId,
+            locationFilter(mode),
+            debouncedQuery,
+          ),
+        );
       } catch (cause) {
         setItems([]);
         setError(apiErrorMessage(cause));
@@ -51,7 +71,7 @@ export function useCatalogItemList({ warehouseId, mode }: Args) {
         setRefreshing(false);
       }
     },
-    [mode, warehouseId],
+    [debouncedQuery, mode, warehouseId],
   );
 
   const confirmRemove = useCallback(
@@ -89,6 +109,8 @@ export function useCatalogItemList({ warehouseId, mode }: Args) {
   );
 
   return {
+    query,
+    setQuery,
     items,
     loading,
     refreshing,

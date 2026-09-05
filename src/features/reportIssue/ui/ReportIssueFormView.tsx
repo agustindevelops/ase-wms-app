@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
@@ -22,8 +22,10 @@ export function ReportIssueFormView({
   setQtyText,
   notes,
   setNotes,
+  ownedQty,
   maxQty,
   loading,
+  refreshing,
   busy,
   error,
   load,
@@ -38,7 +40,17 @@ export function ReportIssueFormView({
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
+        <ScrollView
+          className="flex-1"
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void load(true)}
+              tintColor="#7e9570"
+            />
+          }
+        >
           <VStack className="px-6 pt-4 pb-8 gap-3.5">
             {loading ? (
               <Box className="py-8 items-center">
@@ -46,11 +58,12 @@ export function ReportIssueFormView({
               </Box>
             ) : (
               <Text size="sm" className="text-brown-500">
-                {itemName} · {maxQty} available. Owned and available quantity are reduced.
+                {itemName} · qty {ownedQty}.
+                Reporting reduces total inventory.
               </Text>
             )}
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Type
             </Text>
             <Pressable
@@ -59,10 +72,10 @@ export function ReportIssueFormView({
               className={`rounded-lg border px-3 py-2.5 ${
                 type === 'MISSING'
                   ? 'border-green-700 bg-green-700/15'
-                  : 'border-border bg-card'
+                  : 'border-brown-200 bg-white/70'
               }`}
             >
-              <Text size="sm" className="text-brown-900">
+              <Text size="sm" className="text-brown-800">
                 Missing
               </Text>
             </Pressable>
@@ -72,15 +85,15 @@ export function ReportIssueFormView({
               className={`rounded-lg border px-3 py-2.5 ${
                 type === 'BROKEN'
                   ? 'border-green-700 bg-green-700/15'
-                  : 'border-border bg-card'
+                  : 'border-brown-200 bg-white/70'
               }`}
             >
-              <Text size="sm" className="text-brown-900">
+              <Text size="sm" className="text-brown-800">
                 Broken
               </Text>
             </Pressable>
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Quantity
             </Text>
             <Input>
@@ -92,7 +105,7 @@ export function ReportIssueFormView({
               />
             </Input>
 
-            <Text size="sm" bold className="text-brown-900">
+            <Text size="sm" bold className="text-brown-800">
               Notes (optional)
             </Text>
             <Input>
@@ -117,7 +130,11 @@ export function ReportIssueFormView({
               </VStack>
             ) : null}
 
-            <Button onPress={() => void onSubmit()} disabled={blocked}>
+            <Button
+              variant="destructive"
+              onPress={() => void onSubmit()}
+              disabled={blocked}
+            >
               {busy ? <ButtonSpinner /> : null}
               <ButtonText>Record issue</ButtonText>
             </Button>

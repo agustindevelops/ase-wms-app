@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { BleManager, State } from 'react-native-ble-plx';
 import {
   LabelType,
   NiimbotBluetoothClient,
@@ -18,8 +19,46 @@ function toMessage(error: unknown): string {
 
 export type PrintStatus = 'idle' | 'working' | 'connected' | 'error';
 
+/** Header/status-dot colors for the current printer + Bluetooth adapter. */
+export type PrinterSignal = 'connected' | 'error' | 'off' | 'idle';
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function bluetoothIsOff(state: State): boolean {
+  return (
+    state === State.PoweredOff ||
+    state === State.Unauthorized ||
+    state === State.Unsupported
+  );
+}
+
+function deriveSignal(
+  bluetoothState: State,
+  status: PrintStatus,
+  connectionAttempted: boolean,
+  deviceName: string | null,
+): PrinterSignal {
+  if (bluetoothIsOff(bluetoothState)) {
+    return 'off';
+  }
+  if (status === 'connected' && deviceName) {
+    return 'connected';
+  }
+  if (status === 'error') {
+    return 'error';
+  }
+  if (status === 'working' && deviceName) {
+    return 'connected';
+  }
+  if (bluetoothState === State.PoweredOn && !connectionAttempted) {
+    return 'idle';
+  }
+  if (bluetoothState === State.PoweredOn) {
+    return 'idle';
+  }
+  return 'off';
 }
 
 export function usePrint() {
@@ -29,9 +68,37 @@ export function usePrint() {
   const [message, setMessage] = useState('Turn on the D110, then connect.');
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [printerSummary, setPrinterSummary] = useState<string | null>(null);
+  const [bluetoothState, setBluetoothState] = useState<State>(State.Unknown);
+  const [connectionAttempted, setConnectionAttempted] = useState(false);
   const busy = status === 'working';
+  const signal = deriveSignal(
+    bluetoothState,
+    status,
+    connectionAttempted,
+    deviceName,
+  );
 
-  const connect = async () => {
+  useEffect(() => {
+    const manager = new BleManager();
+    const subscription = manager.onStateChange((next) => {
+      setBluetoothState(next);
+    }, true);
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    printer.setOnDisconnect(() => {
+      setDeviceName(null);
+      setPrinterSummary(null);
+      setStatus('error');
+      setMessage('Printer disconnected.');
+    });
+  }, [printer]);
+
+  const connect = async (): Promise<boolean> => {
+    setConnectionAttempted(true);
     setStatus('working');
     setMessage('Requesting Bluetooth permissions…');
     setPrinterSummary(null);
@@ -94,6 +161,7 @@ export function usePrint() {
       setDeviceName(device.name ?? device.id);
       setStatus('connected');
       setMessage('Connected.');
+      return true;
     } catch (error) {
       const message = toMessage(error);
       setStatus('error');
@@ -101,6 +169,7 @@ export function usePrint() {
       setPrinterSummary(null);
       setMessage(message);
       toast.error(message);
+      return false;
     }
   };
 
@@ -179,6 +248,9 @@ export function usePrint() {
 
   return {
     status,
+    signal,
+    bluetoothState,
+    connectionAttempted,
     message,
     deviceName,
     printerSummary,

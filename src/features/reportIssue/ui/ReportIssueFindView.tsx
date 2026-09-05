@@ -1,8 +1,9 @@
-import { Image, RefreshControl, ScrollView } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import type { CatalogItem } from '@/api/catalog';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { SafeAreaView } from '@/components/ui/safe-area-view';
 import { Spinner } from '@/components/ui/spinner';
@@ -90,40 +91,42 @@ export function ReportIssueFindView({
           {items.map((item) => {
             const photo = item.files.find((file) => file.publicUrl)?.publicUrl;
             const place = locationLabel(item);
-            const available = Math.min(
-              item.quantityOwned,
-              item.quantityAvailable,
-            );
+            const subtitle = [
+              item.category?.name,
+              `qty ${item.quantityOwned}`,
+              place,
+            ]
+              .filter(Boolean)
+              .join(' · ');
             return (
-              <Button
+              <Pressable
                 key={item.id}
-                variant="outline"
-                className="h-auto py-3 justify-start"
                 disabled={busy}
                 onPress={() => onSelect(item)}
+                className="rounded-2xl border border-brown-200 bg-white/60 px-3 py-2.5"
+                accessibilityRole="button"
+                accessibilityLabel={item.name}
               >
-                {photo ? (
-                  <Box className="w-12 h-12 rounded-lg overflow-hidden mr-2">
-                    <Image
-                      source={{ uri: photo }}
-                      style={{ width: '100%', height: '100%' }}
-                      resizeMode="cover"
-                    />
+                <HStack className="items-center gap-3">
+                  <Box className="w-11 h-11 rounded-lg overflow-hidden bg-brown-100 shrink-0">
+                    {photo ? (
+                      <Image
+                        source={{ uri: photo }}
+                        style={{ width: 44, height: 44 }}
+                        resizeMode="cover"
+                      />
+                    ) : null}
                   </Box>
-                ) : null}
-                <VStack className="flex-1 items-start gap-0.5">
-                  <ButtonText className="text-left">{item.name}</ButtonText>
-                  <Text size="xs" className="text-brown-500">
-                    {[
-                      item.category?.name,
-                      `${available} available`,
-                      place,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </Text>
-                </VStack>
-              </Button>
+                  <VStack className="flex-1 items-start gap-0.5 min-w-0">
+                    <Text size="sm" bold className="text-brown-800">
+                      {item.name}
+                    </Text>
+                    <Text size="xs" className="text-brown-500">
+                      {subtitle}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Pressable>
             );
           })}
         </VStack>

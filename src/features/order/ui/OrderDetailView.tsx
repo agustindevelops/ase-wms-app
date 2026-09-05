@@ -1,6 +1,11 @@
 import { Pressable, RefreshControl, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import type { FulfillmentLine, OrderFulfillmentMode } from '@/api/order';
+import {
+  canMutateFulfillment,
+  canReportOrderIssue,
+  isFulfillmentComplete,
+} from '@/lib/orderStatus';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
@@ -32,20 +37,22 @@ export function OrderDetailView({
   onSelectLine,
   onReportIssue,
 }: OrderDetailViewProps) {
+  const completed = !!order && isFulfillmentComplete(order, mode);
+  const canEdit = !!order && canMutateFulfillment(order, mode);
+  const canReport = !!order && canReportOrderIssue(order);
   const remainingLines =
     order?.lines.filter(
-      (line) => !line.item.archived && remainingForMode(line, mode) > 0,
+      (line) =>
+        canEdit &&
+        !line.item.archived &&
+        remainingForMode(line, mode) > 0,
     ) ?? [];
   const sortedLines = order
-    ? [...order.lines]
-        .filter(
-          (line) => !line.item.archived || remainingForMode(line, mode) > 0,
-        )
-        .sort((a, b) => {
-          const aDone = remainingForMode(a, mode) === 0 ? 1 : 0;
-          const bDone = remainingForMode(b, mode) === 0 ? 1 : 0;
-          return aDone - bDone;
-        })
+    ? [...order.lines].sort((a, b) => {
+        const aDone = remainingForMode(a, mode) === 0 ? 1 : 0;
+        const bDone = remainingForMode(b, mode) === 0 ? 1 : 0;
+        return aDone - bDone;
+      })
     : [];
 
   return (
@@ -63,24 +70,42 @@ export function OrderDetailView({
         <VStack className="px-6 pt-4 pb-8 gap-3.5">
           {order ? (
             <Text size="sm" className="text-brown-500">
-              {[order.status.name, formatEventDate(order.eventDate)]
+              {[
+                completed ? 'Completed' : order.status.name,
+                formatEventDate(order.eventDate),
+              ]
                 .filter(Boolean)
                 .join(' · ')}
             </Text>
           ) : null}
 
-          <Text size="sm" className="text-brown-500">
-            {mode === 'pickup'
-              ? 'Scan an item QR or tap a remaining line, then enter quantity.'
-              : 'Scan or tap a line, enter qty, then scan its assigned location QR.'}
-          </Text>
+          {completed ? (
+            <Box className="rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+              <Text size="sm" bold className="text-green-800">
+                {mode === 'pickup' ? 'Pickup complete' : 'Return complete'}
+              </Text>
+              <Text size="sm" className="text-brown-500">
+                {mode === 'pickup'
+                  ? 'Review the checklist or report a problem. Picks cannot be changed.'
+                  : 'This order is fully returned. Review the items below.'}
+              </Text>
+            </Box>
+          ) : (
+            <Text size="sm" className="text-brown-500">
+              {mode === 'pickup'
+                ? 'Scan an item QR or tap a remaining line, then enter quantity.'
+                : 'Scan or tap a line, enter qty, then scan its assigned location QR.'}
+            </Text>
+          )}
 
-          <Button
-            onPress={onScanItem}
-            disabled={loading || remainingLines.length === 0}
-          >
-            <ButtonText>Scan item QR</ButtonText>
-          </Button>
+          {canEdit ? (
+            <Button
+              onPress={onScanItem}
+              disabled={loading || remainingLines.length === 0}
+            >
+              <ButtonText>Scan item QR</ButtonText>
+            </Button>
+          ) : null}
 
           {loading ? (
             <Box className="py-8 items-center">
@@ -100,7 +125,7 @@ export function OrderDetailView({
             </VStack>
           ) : null}
 
-          {!loading && order && remainingLines.length === 0 && !error ? (
+          {!loading && order && remainingLines.length === 0 && !error && canEdit ? (
             <Text size="sm" className="text-brown-500">
               {mode === 'pickup'
                 ? 'All items on this order are picked.'
@@ -114,19 +139,19 @@ export function OrderDetailView({
             return (
               <HStack
                 key={line.id}
-                className="rounded-lg border border-border bg-card px-3 py-3 items-start"
+                className={`rounded-2xl border px-3 py-3 items-start ${
+                  done
+                    ? 'border-green-200 bg-green-50'
+                    : 'border-brown-200 bg-white/60'
+                }`}
               >
                 <Pressable
                   className="flex-1"
-                  disabled={done || loading}
+                  disabled={!canEdit || done || loading}
                   onPress={() => onSelectLine(line)}
                 >
                   <VStack className="gap-0.5 pr-2">
-                    <Text
-                      size="sm"
-                      bold
-                      className={done ? 'text-brown-500' : 'text-brown-900'}
-                    >
+                    <Text size="sm" bold className="text-brown-800">
                       {done ? `✓ ${line.item.name}` : line.item.name}
                     </Text>
                     <Text size="xs" className="text-brown-500">
@@ -147,18 +172,24 @@ export function OrderDetailView({
                     ) : null}
                   </VStack>
                 </Pressable>
-                {mode === 'return' && remaining > 0 ? (
-                  <Pressable
-                    disabled={loading}
-                    onPress={() => onReportIssue(line)}
-                    hitSlop={8}
-                    className="pt-0.5"
-                  >
-                    <Text size="xs" bold className="text-brown-500">
-                      Missing / Broken
+                <VStack className="items-end gap-1.5 pt-0.5">
+                  {done ? (
+                    <Text size="xs" bold className="text-green-700">
+                      Done
                     </Text>
-                  </Pressable>
-                ) : null}
+                  ) : null}
+                  {canReport && line.qtyOutstanding > 0 ? (
+                    <Pressable
+                      disabled={loading}
+                      onPress={() => onReportIssue(line)}
+                      hitSlop={8}
+                    >
+                      <Text size="xs" bold className="text-destructive">
+                        Missing / Broken
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </VStack>
               </HStack>
             );
           })}

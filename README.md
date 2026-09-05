@@ -1,4 +1,4 @@
-# ASE WMS — Mobile app
+# ASE WIS — Mobile app
 
 Expo (SDK 57) warehouse app for Aniah Social Events. Companion to `ase-wms-web`.
 

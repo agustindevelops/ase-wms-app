@@ -1,4 +1,4 @@
-import { Platform, ScrollView } from 'react-native';
+import { Platform, RefreshControl, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Box } from '@/components/ui/box';
 import { ButtonSpinner, ButtonText } from '@/components/ui/button';
@@ -23,6 +23,7 @@ export function PrintLocationLabelView({
   qrPayload,
   error,
   loading,
+  refreshing,
   ensuring,
   sharing,
   printerBusy,
@@ -42,7 +43,16 @@ export function PrintLocationLabelView({
     <ActionLockProvider>
     <SafeAreaView className="flex-1 bg-cream" edges={['bottom', 'left', 'right']}>
       <StatusBar style="dark" />
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => void load(true)}
+            tintColor="#7e9570"
+          />
+        }
+      >
         <VStack className="px-6 pt-4 pb-8 gap-3.5">
           {unit ? (
             <HStack className="items-start gap-3">
@@ -84,13 +94,13 @@ export function PrintLocationLabelView({
             </VStack>
           ) : null}
 
-          <Card className="p-4 gap-2 border border-border bg-card">
-            <Text size="xs" bold className="text-muted-foreground uppercase">
+          <Card className="p-4 gap-2">
+            <Text size="xs" bold className="text-brown-500 uppercase">
               QR payload
             </Text>
             <Text
               size="sm"
-              className="text-foreground"
+              className="text-brown-800"
               style={{
                 fontFamily: Platform.select({
                   ios: 'Menlo',
@@ -100,17 +110,17 @@ export function PrintLocationLabelView({
             >
               {qrPayload ?? 'Not created yet'}
             </Text>
-            <Text size="sm" className="text-muted-foreground leading-5">
+            <Text size="sm" className="text-brown-500 leading-5">
               {deviceName
                 ? `Print to ${deviceName}`
                 : 'Connect a D110 to print, or share the payload.'}
             </Text>
             {printerSummary ? (
-              <Text size="sm" className="text-muted-foreground">
+              <Text size="sm" className="text-brown-500">
                 {printerSummary}
               </Text>
             ) : null}
-            <Text size="sm" className="text-muted-foreground leading-5">
+            <Text size="sm" className="text-brown-500 leading-5">
               {printerMessage}
             </Text>
           </Card>

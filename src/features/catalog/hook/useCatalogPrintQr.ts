@@ -1,10 +1,9 @@
 import { useCallback, useState } from 'react';
-import { Share } from 'react-native';
+import { Alert } from 'react-native';
 import { apiErrorMessage } from '@/api/client';
 import {
   createItemQr,
   deleteItemQr,
-  ensureItemQrPayload,
   itemQrPayload,
   type CatalogItem,
   type CatalogQrCode,
@@ -32,9 +31,12 @@ export function useCatalogPrintQr({
     initialQrCodeId ?? null,
   );
   const [qrCode, setQrCode] = useState<CatalogQrCode | null>(null);
+  const [printed, setPrinted] = useState(false);
+  const [showPrinterSetup, setShowPrinterSetup] = useState(
+    () => !print.deviceName,
+  );
   const [ensuring, setEnsuring] = useState(false);
   const [replacing, setReplacing] = useState(false);
-  const [sharing, setSharing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const seedItem = useCallback((): CatalogItem => {
@@ -57,15 +59,25 @@ export function useCatalogPrintQr({
     };
   }, [initialQrCodeId, item, itemId, itemName, warehouseId]);
 
-  const resolveQr = useCallback(async () => {
+  const createQrForPrint = useCallback(async () => {
+    const existing = qrPayload ?? itemQrPayload(seedItem());
+    if (existing) {
+      return { payload: existing, created: false as const };
+    }
+
     setEnsuring(true);
     setError(null);
     try {
-      const resolved = await ensureItemQrPayload(warehouseId, seedItem());
-      setItem(resolved.item);
-      setQrPayload(resolved.payload);
-      setQrCode(resolved.qrCode);
-      return resolved;
+      const created = await createItemQr(itemId);
+      const payload =
+        created.qrCode.payload?.trim() || created.qrCode.id.trim();
+      if (!payload) {
+        throw new Error('QR code was created without a printable payload.');
+      }
+      setItem(created.item);
+      setQrCode(created.qrCode);
+      setQrPayload(payload);
+      return { payload, created: true as const };
     } catch (cause) {
       const message = apiErrorMessage(cause);
       setError(message);
@@ -74,93 +86,102 @@ export function useCatalogPrintQr({
     } finally {
       setEnsuring(false);
     }
-  }, [seedItem, toast, warehouseId]);
+  }, [itemId, qrPayload, seedItem, toast]);
 
-  const ensureQr = async () => {
-    const resolved = await resolveQr();
-    return resolved?.payload ?? null;
-  };
+  const rollbackCreatedQr = useCallback(async () => {
+    try {
+      await deleteItemQr(itemId);
+    } catch (cause) {
+      console.warn('Failed to roll back item QR after print error:', cause);
+    }
+    setQrPayload(null);
+    setQrCode(null);
+  }, [itemId]);
 
-  const replaceQr = async () => {
+  const runReplaceQr = useCallback(async () => {
     setReplacing(true);
     setError(null);
     try {
-      const current = seedItem();
-      const existingId = current.qrCodeId ?? qrCode?.id;
-      if (existingId) {
-        await deleteItemQr(itemId);
-      }
-
+      await deleteItemQr(itemId);
       const created = await createItemQr(itemId);
       const payload =
         created.qrCode.payload?.trim() || created.qrCode.id.trim();
+      if (!payload) {
+        throw new Error('QR code was created without a printable payload.');
+      }
       setItem(created.item);
       setQrCode(created.qrCode);
       setQrPayload(payload);
-      toast.success('Item QR replaced.');
-      return payload;
+      setPrinted(false);
+      toast.success('Replaced QR code. Print a new label.');
     } catch (cause) {
       const message = apiErrorMessage(cause);
       setError(message);
       toast.error(message);
-      return null;
     } finally {
       setReplacing(false);
     }
-  };
+  }, [itemId, toast]);
 
-  const shareLabel = async () => {
-    const resolved = qrPayload
-      ? { payload: qrPayload }
-      : await resolveQr();
-    if (!resolved) return;
+  const replaceQr = useCallback(() => {
+    Alert.alert(
+      'Replace QR code?',
+      'The current label will stop working. Print a new label after replacing.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Replace',
+          style: 'destructive',
+          onPress: () => {
+            void runReplaceQr();
+          },
+        },
+      ],
+    );
+  }, [runReplaceQr]);
 
-    setSharing(true);
-    try {
-      await Share.share({
-        title: itemName,
-        message: `${itemName}\n${resolved.payload}`,
-      });
-    } catch (cause) {
-      toast.error(apiErrorMessage(cause));
-    } finally {
-      setSharing(false);
-    }
-  };
-
-  const printLabel = async () => {
+  const printLabel = async (): Promise<boolean> => {
     if (!print.deviceName) {
-      toast.error('Connect a D110 printer first.');
-      return;
+      setShowPrinterSetup(true);
+      const connected = await print.connect();
+      if (!connected) {
+        return false;
+      }
     }
 
-    const resolved = await resolveQr();
-    if (!resolved) return;
+    const resolved = await createQrForPrint();
+    if (!resolved) return false;
 
     try {
       await print.printQrPayload(resolved.payload, itemName);
+      setPrinted(true);
       toast.success('Printed item label.');
+      return true;
     } catch {
-      // usePrint already toasted
+      if (resolved.created) {
+        await rollbackCreatedQr();
+      }
+      return false;
     }
   };
 
   return {
     itemName,
     qrPayload: qrPayload ?? itemQrPayload(seedItem()),
+    qrCode,
     error,
+    printed,
     ensuring,
     replacing,
-    sharing,
+    showPrinterSetup,
     printerBusy: print.busy,
     printerMessage: print.message,
     deviceName: print.deviceName,
     printerSummary: print.printerSummary,
-    ensureQr,
-    replaceQr,
-    shareLabel,
+    printerSignal: print.signal,
     connectPrinter: print.connect,
     printLabel,
+    replaceQr,
   };
 }
 

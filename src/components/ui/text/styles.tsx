@@ -6,14 +6,15 @@ const baseStyle = isWeb
   : '';
 
 export const textStyle = tva({
-  base: `text-foreground font-body ${baseStyle}`,
+  base: `text-brown-800 font-body font-normal ${baseStyle}`,
 
   variants: {
     isTruncated: {
       true: 'web:truncate',
     },
     bold: {
-      true: 'font-bold',
+      // RN needs a real Inter file — fontWeight alone falls back to system black.
+      true: 'font-inter-bold',
     },
     underline: {
       true: 'underline',

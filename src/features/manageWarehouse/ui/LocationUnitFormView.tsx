@@ -43,7 +43,7 @@ export function LocationUnitFormView({
                   : `Create a location unit at level ${level}.`}
               </Text>
 
-              <Text size="sm" bold className="text-brown-900">
+              <Text size="sm" bold className="text-brown-800">
                 Name
               </Text>
               <Input>
@@ -55,7 +55,7 @@ export function LocationUnitFormView({
                 />
               </Input>
 
-              <Text size="sm" bold className="text-brown-900">
+              <Text size="sm" bold className="text-brown-800">
                 Label
               </Text>
               <Input>

@@ -28,6 +28,13 @@ export function CatalogScanItem() {
     warehouseId: params.warehouseId,
     mode: params.mode,
     onItem: (item) => {
+      if (params.mode === 'edit') {
+        navigation.replace('CatalogPhoto', {
+          warehouseId: params.warehouseId,
+          itemId: item.id,
+        });
+        return;
+      }
       if (params.mode === 'move') {
         navigation.replace('CatalogScanLocation', {
           warehouseId: params.warehouseId,
@@ -81,9 +88,11 @@ export function CatalogScanItem() {
         ...scan.config,
         title: 'Scan item QR',
         hint:
-          params.mode === 'move'
-            ? 'Point at the item QR, then scan the new location.'
-            : 'Point at the item QR to detach it from its location.',
+          params.mode === 'edit'
+            ? 'Point at the item QR to edit photos, details, or its label.'
+            : params.mode === 'move'
+              ? 'Point at the item QR, then scan the new location.'
+              : 'Point at the item QR to detach it from its location.',
       }}
       permission={scan.permission}
       requestPermission={scan.requestPermission}
