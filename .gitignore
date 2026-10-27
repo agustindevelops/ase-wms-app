@@ -31,7 +31,9 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
@@ -42,7 +44,3 @@ yarn-error.*
 
 # local EAS artifacts
 builds/
-
-#creds
-.env
-.env.prod
