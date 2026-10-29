@@ -21,8 +21,6 @@ import { formatEventDate } from '../hook/useOrderList';
 
 export type OrderDetailViewProps = UseOrderDetailResult & {
   mode: OrderFulfillmentMode;
-  canDelete: boolean;
-  onDelete: () => void;
   onScanItem: () => void;
   onSelectLine: (line: FulfillmentLine) => void;
   onReportIssue: (line: FulfillmentLine) => void;
@@ -35,8 +33,6 @@ export function OrderDetailView({
   refreshing,
   error,
   load,
-  canDelete,
-  onDelete,
   onScanItem,
   onSelectLine,
   onReportIssue,
@@ -197,17 +193,6 @@ export function OrderDetailView({
               </HStack>
             );
           })}
-
-          {order && canDelete ? (
-            <Button
-              variant="destructive"
-              className="mt-3"
-              disabled={loading}
-              onPress={onDelete}
-            >
-              <ButtonText>Delete order</ButtonText>
-            </Button>
-          ) : null}
         </VStack>
       </ScrollView>
     </SafeAreaView>

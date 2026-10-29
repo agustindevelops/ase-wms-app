@@ -8,7 +8,6 @@ import { Box } from '@/components/ui/box';
 import { Spinner } from '@/components/ui/spinner';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { ScreenErrorBoundary } from '@/components/ui/ScreenErrorBoundary';
-import { ModalProvider } from '@/components/modal/ModalContext';
 import { RootNavigator } from '@/navigation/RootNavigator';
 
 export default function App() {
@@ -39,11 +38,9 @@ export default function App() {
           }}
         >
           <GluestackUIProvider mode="light">
-            <ModalProvider>
-              <ScreenErrorBoundary>
-                <RootNavigator />
-              </ScreenErrorBoundary>
-            </ModalProvider>
+            <ScreenErrorBoundary>
+              <RootNavigator />
+            </ScreenErrorBoundary>
           </GluestackUIProvider>
         </SafeAreaListener>
       </SafeAreaProvider>

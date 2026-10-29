@@ -7,7 +7,6 @@ import { api } from './client';
  * GET  /order/pickup/{orderId}
  * GET  /order/pickup/{orderId}/scan?payload=
  * POST /order/pickup/{orderId}
- * DELETE /order/{orderId} (admin only)
  * GET  /order/return
  * GET  /order/return/{orderId}
  * GET  /order/return/{orderId}/scan?payload=&itemId=
@@ -88,10 +87,6 @@ export async function getFulfillmentOrder(
     `${basePath(mode)}/${orderId}`,
   );
   return data.order;
-}
-
-export async function deleteOrder(orderId: string): Promise<void> {
-  await api.delete(`/order/${orderId}`);
 }
 
 export async function scanFulfillmentQr(
